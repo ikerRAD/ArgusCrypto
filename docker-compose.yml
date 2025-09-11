@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-database}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-database}
+      POSTGRES_DB: ${POSTGRES_DB:-database}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-database}:${POSTGRES_PASSWORD:-database}@db:5432/${POSTGRES_DB:-database}"
+    ports:
+      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
+    volumes:
+      - ./backend:/app
+
+volumes:
+  db_data:
