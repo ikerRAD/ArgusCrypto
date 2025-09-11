@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint, String
 from sqlalchemy.orm import relationship
 
-from backend.app.db import BaseModel
+from app.db import BaseModel
 
 
 class Ticker(BaseModel):

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, ForeignKey, Float, DateTime, Index
 from sqlalchemy.orm import relationship
 
-from backend.app.db import BaseModel
+from app.db import BaseModel
 
 
 class Price(BaseModel):

@@ -2,7 +2,7 @@
 set -e
 
 echo "Waiting for Postgres..."
-until pg_isready -h db -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-postgres}"; do
+until pg_isready -h db -p "${POSTGRES_PORT:-5432}" -U "${POSTGRES_USER:-database}"; do
   sleep 1
 done
 echo "Postgres is ready!"
@@ -12,4 +12,4 @@ alembic upgrade head
 echo "Migrations complete!"
 
 echo "Starting the FastAPI server..."
-exec uvicorn app.main:app --host "${BACKEND_HOST:-0.0.0.0}" --port "${BACKEND_PORT:-8000}"
+#exec uvicorn app.main:app --host "${BACKEND_HOST:-0.0.0.0}" --port "${BACKEND_PORT:-8000}"
