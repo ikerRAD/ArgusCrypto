@@ -13,6 +13,9 @@ class BinanceClient(ExchangeClient):
         self.__binance_api_url = api_base_url + self.__BINANCE_API_PRICE_PATH
 
     def fetch_price_for_tickers(self, tickers: list[Ticker]) -> list[Price]:
+        if not tickers:
+            return []
+
         ticker_map = self.__map_tickers_by_symbol(tickers)
         prices: list[Price] = []
 

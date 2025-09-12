@@ -15,7 +15,7 @@ class UpdatePricesFromRemoteCommand(Instruction):
         self.__exchange_repository = exchange_repository
         self.__price_repository = price_repository
 
-    def execute(self) -> Response | None:
+    def execute(self) -> None:
         exchange = self.__exchange_repository.find_exchange(fetch_tickers=True)
 
         fetched_prices = self.__exchange_client.fetch_price_for_tickers(

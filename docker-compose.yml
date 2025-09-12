@@ -9,6 +9,10 @@ services:
       - db_data:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
+    profiles:
+      - database
+      - backend
+      - mq
 
   backend:
     build:
@@ -24,6 +28,8 @@ services:
       - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
     volumes:
       - ./backend:/app
+    profiles:
+      - backend
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -37,6 +43,8 @@ services:
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"
       - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
+    profiles:
+      - mq
 
   celery_beat:
     build:
@@ -49,6 +57,8 @@ services:
       - .env
     command: celery -A app.tasks beat --loglevel=info
     entrypoint: []
+    profiles:
+      - mq
 
   celery_worker:
     build:
@@ -60,7 +70,9 @@ services:
     env_file:
       - .env
     command: celery -A app.tasks worker --loglevel=info
-    entrypoint: [ ]
+    entrypoint: []
+    profiles:
+      - mq
 
 volumes:
   db_data:

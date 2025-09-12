@@ -1,4 +1,5 @@
 from celery import Celery
+from celery.utils.log import get_task_logger
 
 from app.settings import CELERY_BROKER_URL, CELERY_BACKEND_URL, BINANCE_INTERVAL
 
@@ -16,6 +17,8 @@ celery_app.conf.beat_schedule = {
         "schedule": BINANCE_INTERVAL,
     }
 }
+
+logger = get_task_logger(__name__)
 
 
 @celery_app.task
