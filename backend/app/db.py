@@ -1,5 +1,27 @@
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer
+from typing import Generator
+
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from sqlalchemy import Column, Integer, create_engine
+from contextlib import contextmanager
+
+from app.settings import DATABASE_URL
+
+engine = create_engine(DATABASE_URL, echo=False)
+SessionLocal = sessionmaker(engine, expire_on_commit=False)
+
+
+@contextmanager
+def get_session() -> Generator[Session, None, None]:
+    session = SessionLocal()
+    try:
+        yield session
+        session.commit()
+    except:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
 
 Base = declarative_base()
 

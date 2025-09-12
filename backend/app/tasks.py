@@ -1,5 +1,4 @@
 from celery import Celery
-from celery.utils.log import get_task_logger
 
 from app.settings import CELERY_BROKER_URL, CELERY_BACKEND_URL, BINANCE_INTERVAL
 
@@ -18,8 +17,12 @@ celery_app.conf.beat_schedule = {
     }
 }
 
-logger = get_task_logger(__name__)
 
 @celery_app.task
 def fetch_and_store_binance_cripto_prices():
-    logger.info("Fetching prices...")
+    from app.entrypoints.tasks.fetch_binance_prices_handler import (
+        FetchBinancePricesHandler,
+    )
+
+    task_handler = FetchBinancePricesHandler()
+    task_handler.handle()

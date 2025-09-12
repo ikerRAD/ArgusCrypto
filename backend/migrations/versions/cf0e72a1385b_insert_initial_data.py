@@ -64,7 +64,7 @@ def upgrade() -> None:
             {
                 "symbol_id": btc_symbol_id,
                 "exchange_id": binance_exchange_id,
-                "ticker": "BTCBEUR",
+                "ticker": "BTCEUR",
             },
         ],
     )
@@ -82,7 +82,7 @@ def downgrade() -> None:
 
     connection.execute(
         sa.text(
-            "DELETE FROM tickers WHERE symbol_id=:symbol_id AND exchange_id=:exchange_id AND ticker IN ('BTCUSDT', 'BTCBEUR')"
+            "DELETE FROM tickers WHERE symbol_id=:symbol_id AND exchange_id=:exchange_id AND ticker IN ('BTCUSDT', 'BTCEUR')"
         ),
         {"symbol_id": btc_symbol_id, "exchange_id": binance_exchange_id},
     )
