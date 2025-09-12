@@ -9,14 +9,10 @@ from app.domain.exchange.models import Exchange
 from app.domain.exchange.repositories.exchange_repository import ExchangeRepository
 
 
-class DbBinanceRepository(ExchangeRepository):
-    __BINANCE_EXCHANGE_NAME = "Binance"
-
-    def find_exchange(self, fetch_tickers=False) -> Exchange:
+class DbExchangeRepository(ExchangeRepository):
+    def find_exchange(self, exchange_name: str, fetch_tickers: bool) -> Exchange:
         with get_session() as session:
-            statement = select(Exchange).where(
-                Exchange.name == self.__BINANCE_EXCHANGE_NAME
-            )
+            statement = select(Exchange).where(Exchange.name == exchange_name)
 
             if fetch_tickers:
                 statement = statement.options(selectinload(Exchange.tickers))
@@ -25,6 +21,6 @@ class DbBinanceRepository(ExchangeRepository):
             exchange: Exchange | None = query_result.scalar_one_or_none()
 
             if exchange is None:
-                raise ExchangeNotFoundException(self.__BINANCE_EXCHANGE_NAME)
+                raise ExchangeNotFoundException(exchange_name)
 
             return exchange

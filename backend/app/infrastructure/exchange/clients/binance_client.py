@@ -16,7 +16,7 @@ class BinanceClient(ExchangeClient):
         if not tickers:
             return []
 
-        ticker_map = self.__map_tickers_by_symbol(tickers)
+        ticker_map = self._map_tickers_by_symbol(tickers)
         prices: list[Price] = []
 
         with httpx.Client() as client:
@@ -30,10 +30,6 @@ class BinanceClient(ExchangeClient):
                     prices.append(price)
 
         return prices
-
-    @staticmethod
-    def __map_tickers_by_symbol(tickers: list[Ticker]) -> dict[str, Ticker]:
-        return {ticker.ticker: ticker for ticker in tickers}
 
     @staticmethod
     def __get_params_from_tickers(tickers: list[Ticker]) -> dict[str, str]:

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from app.domain.exchange.models import Exchange
 
 
-class ExchangeRepository(ABC):
+class ExchangeFinder(ABC):
     @abstractmethod
-    def find_exchange(self, exchange_name: str, fetch_tickers: bool) -> Exchange:
+    def find(self, fetch_tickers=False) -> Exchange:
         pass

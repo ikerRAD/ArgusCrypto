@@ -18,8 +18,8 @@ class TestBinanceClient(TestCase):
         response = Mock(spec=Response)
         response.status_code = 200
         response.json.return_value = [
-            {"symbol":"BTCUSDT", "price":"100.000020"},
-            {"symbol":"BTCEUR", "price":"200.0"},
+            {"symbol": "BTCUSDT", "price": "100.000020"},
+            {"symbol": "BTCEUR", "price": "200.0"},
         ]
         httpx_client = Mock(spec=Client)
         httpx_client.get.return_value = response
@@ -34,7 +34,7 @@ class TestBinanceClient(TestCase):
         self.assertEqual(result[1].price, 200.0)
         httpx_client.get.assert_called_once_with(
             "http://binance.example.test/api/v3/ticker/price",
-            params = {"symbols":'["BTCUSDT","BTCEUR"]'}
+            params={"symbols": '["BTCUSDT","BTCEUR"]'},
         )
 
     def test_fetch_price_for_empty_tickers(self) -> None:
@@ -43,7 +43,9 @@ class TestBinanceClient(TestCase):
         self.assertEqual(result, [])
 
     @patch("app.infrastructure.exchange.clients.binance_client.httpx.Client")
-    def test_fetch_price_for_tickers_request_fails(self, httpx_client_class: Mock) -> None:
+    def test_fetch_price_for_tickers_request_fails(
+        self, httpx_client_class: Mock
+    ) -> None:
         btcusdt_ticker = Ticker(ticker="BTCUSDT")
         btceur_ticker = Ticker(ticker="BTCEUR")
         response = Mock(spec=Response)
@@ -57,5 +59,5 @@ class TestBinanceClient(TestCase):
         self.assertEqual(result, [])
         httpx_client.get.assert_called_once_with(
             "http://binance.example.test/api/v3/ticker/price",
-            params = {"symbols":'["BTCUSDT","BTCEUR"]'}
+            params={"symbols": '["BTCUSDT","BTCEUR"]'},
         )

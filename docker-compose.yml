@@ -10,8 +10,10 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     profiles:
+      - database
       - backend
       - mq
+      - all
 
   backend:
     build:
@@ -29,6 +31,7 @@ services:
       - ./backend:/app
     profiles:
       - backend
+      - all
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -44,6 +47,7 @@ services:
       - "${RABBITMQ_MANAGEMENT_PORT:-15672}:15672"
     profiles:
       - mq
+      - all
 
   celery_beat:
     build:
@@ -58,6 +62,7 @@ services:
     entrypoint: []
     profiles:
       - mq
+      - all
 
   celery_worker:
     build:
@@ -72,6 +77,7 @@ services:
     entrypoint: []
     profiles:
       - mq
+      - all
 
 volumes:
   db_data:
