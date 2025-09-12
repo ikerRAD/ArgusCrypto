@@ -1,8 +1,8 @@
-"""insert initial data
+"""insert kraken exchange with some data
 
-Revision ID: cf0e72a1385b
-Revises: 35d554d2d18c
-Create Date: 2025-09-11 16:22:43.995557
+Revision ID: 56c8a737efdc
+Revises: cf0e72a1385b
+Create Date: 2025-09-12 15:02:01.628322
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "cf0e72a1385b"
-down_revision: Union[str, Sequence[str], None] = "35d554d2d18c"
+revision: str = "56c8a737efdc"
+down_revision: Union[str, Sequence[str], None] = "cf0e72a1385b"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -21,22 +21,11 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.bulk_insert(
         sa.table(
-            "symbols",
-            sa.column("name", sa.String),
-            sa.column("symbol", sa.String),
-        ),
-        [
-            {"name": "Bitcoin", "symbol": "BTC"},
-        ],
-    )
-
-    op.bulk_insert(
-        sa.table(
             "exchanges",
             sa.column("name", sa.String),
         ),
         [
-            {"name": "Binance"},
+            {"name": "Kraken"},
         ],
     )
 
@@ -44,8 +33,8 @@ def upgrade() -> None:
     btc_symbol_id = connection.execute(
         sa.text("SELECT id FROM symbols WHERE symbol='BTC'")
     ).scalar_one()
-    binance_exchange_id = connection.execute(
-        sa.text("SELECT id FROM exchanges WHERE name='Binance'")
+    kraken_exchange_id = connection.execute(
+        sa.text("SELECT id FROM exchanges WHERE name='Kraken'")
     ).scalar_one()
 
     op.bulk_insert(
@@ -58,13 +47,13 @@ def upgrade() -> None:
         [
             {
                 "symbol_id": btc_symbol_id,
-                "exchange_id": binance_exchange_id,
-                "ticker": "BTCUSDT",
+                "exchange_id": kraken_exchange_id,
+                "ticker": "XBTUSDT",
             },
             {
                 "symbol_id": btc_symbol_id,
-                "exchange_id": binance_exchange_id,
-                "ticker": "BTCEUR",
+                "exchange_id": kraken_exchange_id,
+                "ticker": "XXBTZEUR",
             },
         ],
     )
@@ -76,20 +65,17 @@ def downgrade() -> None:
     btc_symbol_id = connection.execute(
         sa.text("SELECT id FROM symbols WHERE symbol='BTC'")
     ).scalar_one()
-    binance_exchange_id = connection.execute(
-        sa.text("SELECT id FROM exchanges WHERE name='Binance'")
+    kraken_exchange_id = connection.execute(
+        sa.text("SELECT id FROM exchanges WHERE name='Kraken'")
     ).scalar_one()
 
     connection.execute(
         sa.text(
-            "DELETE FROM tickers WHERE symbol_id=:symbol_id AND exchange_id=:exchange_id AND ticker IN ('BTCUSDT', 'BTCEUR')"
+            "DELETE FROM tickers WHERE symbol_id=:symbol_id AND exchange_id=:exchange_id AND ticker IN ('XBTUSDT', 'XXBTZEUR')"
         ),
-        {"symbol_id": btc_symbol_id, "exchange_id": binance_exchange_id},
-    )
-    connection.execute(
-        sa.text("DELETE FROM symbols WHERE id=:symbol_id"), {"symbol_id": btc_symbol_id}
+        {"symbol_id": btc_symbol_id, "exchange_id": kraken_exchange_id},
     )
     connection.execute(
         sa.text("DELETE FROM exchanges WHERE id=:exchange_id"),
-        {"exchange_id": binance_exchange_id},
+        {"exchange_id": kraken_exchange_id},
     )
