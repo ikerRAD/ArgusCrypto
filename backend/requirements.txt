@@ -5,3 +5,4 @@ uvicorn==0.35.0
 httpx==0.28.1
 rabbitmq-server==0.0.1
 celery==5.5.3
+fastapi==0.116.1
