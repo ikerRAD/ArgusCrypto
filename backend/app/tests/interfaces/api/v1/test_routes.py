@@ -1,16 +1,16 @@
-from contextlib import contextmanager
-from typing import Generator
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
 from sqlalchemy import create_engine
 from sqlalchemy.pool import StaticPool
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 from starlette.testclient import TestClient
 
 from app.db import Base
 from app.infrastructure.crypto.database.table_models import SymbolTableModel
 from app.main import app
+
+import app.db as db
 
 
 class TestRoutes(TestCase):
@@ -24,6 +24,12 @@ class TestRoutes(TestCase):
         cls.TestingSessionLocal = sessionmaker(bind=cls.engine, expire_on_commit=False)
         Base.metadata.create_all(bind=cls.engine)
 
+        cls.patcher_engine = patch.object(db, "engine", cls.engine)
+        cls.patcher_session = patch.object(db, "SessionLocal", cls.TestingSessionLocal)
+
+        cls.patcher_engine.start()
+        cls.patcher_session.start()
+
         with cls.TestingSessionLocal() as session:
             session.add_all(
                 [
@@ -34,27 +40,12 @@ class TestRoutes(TestCase):
             )
             session.commit()
 
-    def setUp(self) -> None:
-        self.patcher = patch("app.db.get_session", new=self.get_test_session)
-        self.patcher.start()
-
-        self.client = TestClient(app)
-
-    def tearDown(self) -> None:
-        self.patcher.stop()
+        cls.client = TestClient(app)
 
     @classmethod
-    @contextmanager
-    def get_test_session(cls) -> Generator[Session, None, None]:
-        session = cls.TestingSessionLocal()
-        try:
-            yield session
-            session.commit()
-        except:
-            session.rollback()
-            raise
-        finally:
-            session.close()
+    def tearDownClass(cls) -> None:
+        cls.patcher_engine.stop()
+        cls.patcher_session.stop()
 
     def test_get_all_symbols(self) -> None:
         expected_status_code = 200
@@ -66,8 +57,8 @@ class TestRoutes(TestCase):
 
         response = self.client.get("/v1/symbols")
 
-        self.assertEqual(response.status_code, expected_status_code)
-        self.assertEqual(response.json(), expected_content)
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
 
     @patch(
         "app.dependency_injection_factories.application.get_all_symbols.get_all_symbols_query_factory.GetAllSymbolsQueryFactory.create"
@@ -79,5 +70,5 @@ class TestRoutes(TestCase):
 
         response = self.client.get("/v1/symbols")
 
-        self.assertEqual(response.status_code, expected_status_code)
-        self.assertEqual(response.json(), expected_content)
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())

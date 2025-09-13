@@ -26,6 +26,4 @@ class GetAllSymbolsHandler(RouteHandler):
             logger.error(
                 f"An unexpected error happened while retrieving all symbols: {e}"
             )
-            raise HTTPException(
-                status_code=500, detail=f"An unexpected error happened."
-            )
+            raise HTTPException(status_code=500, detail="An unexpected error happened.")
