@@ -10,6 +10,6 @@ class BinanceExchangeFinder(ExchangeFinder):
         self.exchange_repository = exchange_repository
 
     def find(self, fetch_tickers=False) -> Exchange:
-        return self.exchange_repository.find_exchange(
+        return self.exchange_repository.get_or_fail_by_name(
             self.__BINANCE_EXCHANGE_NAME, fetch_tickers
         )

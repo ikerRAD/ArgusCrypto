@@ -29,7 +29,7 @@ class TestDbExchangeRepository(TestCase):
     @patch(
         "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
-    def test_find_exchange(self, get_session: Mock) -> None:
+    def test_get_or_fail_by_name(self, get_session: Mock) -> None:
         query_result = Mock(spec=Result)
         query_result.scalar_one_or_none.return_value = self.exchange_table_model
         session = Mock(spec=Session)
@@ -39,7 +39,7 @@ class TestDbExchangeRepository(TestCase):
             self.exchange
         )
 
-        result = self.repository.find_exchange("Binance", False)
+        result = self.repository.get_or_fail_by_name("Binance", False)
 
         self.assertEqual(result, self.exchange)
         self.assertEqual(result.tickers, None)
@@ -52,7 +52,7 @@ class TestDbExchangeRepository(TestCase):
     @patch(
         "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
-    def test_find_exchange_fetching_tickers(self, get_session: Mock) -> None:
+    def test_get_or_fail_by_name_fetching_tickers(self, get_session: Mock) -> None:
         tickers = [
             Ticker(symbol_id=1, exchange_id=1, ticker="SOME"),
             Ticker(symbol_id=2, exchange_id=1, ticker="OTHER"),
@@ -69,7 +69,7 @@ class TestDbExchangeRepository(TestCase):
         session.execute.return_value = query_result
         get_session.return_value.__enter__.return_value = session
 
-        result = self.repository.find_exchange("Binance", True)
+        result = self.repository.get_or_fail_by_name("Binance", True)
 
         self.assertEqual(result, self.exchange)
         self.assertEqual(result.tickers, tickers)
@@ -82,7 +82,7 @@ class TestDbExchangeRepository(TestCase):
     @patch(
         "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
-    def test_find_exchange_not_found(self, get_session: Mock) -> None:
+    def test_get_or_fail_by_name_not_found(self, get_session: Mock) -> None:
         query_result = Mock(spec=Result)
         query_result.scalar_one_or_none.return_value = None
         session = Mock(spec=Session)
@@ -92,7 +92,7 @@ class TestDbExchangeRepository(TestCase):
         with self.assertRaisesRegex(
             ExchangeNotFoundException, "exchange with name 'Some' not found'"
         ):
-            self.repository.find_exchange("Some", False)
+            self.repository.get_or_fail_by_name("Some", False)
 
         self.db_exchange_translator.translate_to_domain_model.assert_not_called()
         query_result.scalar_one_or_none.assert_called_once()
