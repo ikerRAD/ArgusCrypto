@@ -1,5 +1,5 @@
 from app.db import get_session
-from app.domain.crypto.models import Price
+from app.domain.crypto.models.price import Price
 from app.domain.crypto.repositories.price_repository import PriceRepository
 
 

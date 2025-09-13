@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.domain.exchange.models import Exchange
+from app.domain.exchange.models.exchange import Exchange
 
 
 class ExchangeFinder(ABC):

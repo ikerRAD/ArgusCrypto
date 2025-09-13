@@ -1,7 +1,7 @@
 from unittest import TestCase
 from unittest.mock import Mock
 
-from app.domain.exchange.models import Exchange
+from app.domain.exchange.models.exchange import Exchange
 from app.domain.exchange.repositories.exchange_repository import ExchangeRepository
 from app.infrastructure.exchange.finders.binance_exchange_finder import (
     BinanceExchangeFinder,

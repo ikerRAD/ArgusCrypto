@@ -5,13 +5,13 @@ from app.db import get_session
 from app.domain.exchange.exceptions.exchange_not_found_exception import (
     ExchangeNotFoundException,
 )
-from app.domain.exchange.models import Exchange
+from app.domain.exchange.models.exchange import Exchange
 from app.domain.exchange.repositories.exchange_repository import ExchangeRepository
 
 
 class DbExchangeRepository(ExchangeRepository):
     def find_exchange(self, exchange_name: str, fetch_tickers: bool) -> Exchange:
-        with get_session() as session:
+        with get_session() as session:  # TODO distinguir el tipo exchange
             statement = select(Exchange).where(Exchange.name == exchange_name)
 
             if fetch_tickers:

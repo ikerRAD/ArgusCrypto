@@ -1,27 +1,14 @@
-from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint, String
-from sqlalchemy.orm import relationship
+from __future__ import annotations
 
-from app.db import BaseModel
+from dataclasses import dataclass, field
 
 
-class Ticker(BaseModel):
-    __tablename__ = "tickers"
-
-    symbol_id = Column(
-        Integer, ForeignKey("symbols.id", ondelete="cascade"), nullable=False
-    )
-    exchange_id = Column(
-        Integer, ForeignKey("exchanges.id", ondelete="cascade"), nullable=False
-    )
-    ticker = Column(String, nullable=False)
-
-    prices = relationship(
-        "Price", back_populates="ticker", cascade="all, delete-orphan"
-    )
-
-    symbol = relationship("Symbol", back_populates="tickers")
-    exchange = relationship("Exchange", back_populates="tickers")
-
-    __table_args__ = (
-        UniqueConstraint("exchange_id", "ticker", name="unique_exchange_ticker"),
-    )
+@dataclass
+class Ticker:
+    symbol_id: int
+    exchange_id: int
+    ticker: str
+    id: None | int = field(default=None)
+    prices: list[Price] = field(default_factory=list)
+    symbol: None | Symbol = field(default=None)
+    exchange: None | Exchange = field(default=None)

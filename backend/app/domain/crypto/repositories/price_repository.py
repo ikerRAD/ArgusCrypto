@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from app.domain.crypto.models import Price
+from app.domain.crypto.models.price import Price
 
 
 class PriceRepository(ABC):

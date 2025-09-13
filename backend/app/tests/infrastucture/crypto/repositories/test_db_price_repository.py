@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock
 
 from sqlalchemy.orm import Session
 
-from app.domain.crypto.models import Price
+from app.domain.crypto.models.price import Price
 from app.infrastructure.crypto.repositories.db_price_repository import DbPriceRepository
 
 
@@ -16,7 +16,11 @@ class TestDbPriceRepository(TestCase):
         session = Mock(spec=Session)
         get_session.return_value.__enter__.return_value = session
 
-        prices = [Price(), Price(), Price()]
+        prices = [
+            Price(ticker_id=1, price=1.0),
+            Price(ticker_id=1, price=2.0),
+            Price(ticker_id=1, price=3.0),
+        ]
 
         self.repository.bulk_save(prices)
 

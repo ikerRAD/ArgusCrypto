@@ -2,7 +2,8 @@ from typing import Any
 
 import httpx
 
-from app.domain.crypto.models import Ticker, Price
+from app.domain.crypto.models.price import Price
+from app.domain.crypto.models.ticker import Ticker
 from app.domain.exchange.clients.exchange_client import ExchangeClient
 
 
@@ -30,7 +31,7 @@ class KrakenClient(ExchangeClient):
                 for ticker in result_ticker_info:
                     prices.append(
                         Price(
-                            ticker=ticker_map[ticker],
+                            ticker_id=ticker_map[ticker].id,
                             price=float(result_ticker_info[ticker]["a"][0]),
                         )
                     )

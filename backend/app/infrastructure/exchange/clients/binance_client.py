@@ -2,7 +2,8 @@ import json
 
 import httpx
 
-from app.domain.crypto.models import Ticker, Price
+from app.domain.crypto.models.price import Price
+from app.domain.crypto.models.ticker import Ticker
 from app.domain.exchange.clients.exchange_client import ExchangeClient
 
 
@@ -42,4 +43,4 @@ class BinanceClient(ExchangeClient):
     ) -> Price:
         ticker = ticker_map[price_json["symbol"]]
 
-        return Price(ticker=ticker, price=float(price_json["price"]))
+        return Price(ticker_id=ticker.id, price=float(price_json["price"]))

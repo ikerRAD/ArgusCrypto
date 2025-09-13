@@ -1,5 +1,5 @@
 from app.domain.exchange.finders.exchange_finder import ExchangeFinder
-from app.domain.exchange.models import Exchange
+from app.domain.exchange.models.exchange import Exchange
 from app.domain.exchange.repositories.exchange_repository import ExchangeRepository
 
 

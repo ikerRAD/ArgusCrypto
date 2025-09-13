@@ -31,5 +31,5 @@ class BaseModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
 
-from app.domain.crypto.models import *  # noqa: F401
-from app.domain.exchange.models import *  # noqa: F401
+from app.infrastructure.crypto.database_models import *  # noqa: F401
+from app.infrastructure.exchange.database_models import *  # noqa: F401
