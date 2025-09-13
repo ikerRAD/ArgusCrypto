@@ -5,5 +5,5 @@ from pydantic import BaseModel
 
 class RouteHandler(ABC):
     @abstractmethod
-    def handle(self) -> BaseModel | list[BaseModel]:
+    def handle(self, *args) -> BaseModel | list[BaseModel]:
         pass
