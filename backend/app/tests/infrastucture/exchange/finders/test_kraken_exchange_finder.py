@@ -12,7 +12,7 @@ class TestKrakenExchangeFinder(TestCase):
     def setUp(self) -> None:
         self.exchange = Exchange(name="Kraken")
         self.exchange_repository = Mock(spec=ExchangeRepository)
-        self.exchange_repository.find_exchange.return_value = self.exchange
+        self.exchange_repository.get_or_fail_by_name.return_value = self.exchange
 
         self.finder = KrakenExchangeFinder(self.exchange_repository)
 
@@ -20,10 +20,14 @@ class TestKrakenExchangeFinder(TestCase):
         result = self.finder.find()
 
         self.assertEqual(result, self.exchange)
-        self.exchange_repository.find_exchange.assert_called_once_with("Kraken", False)
+        self.exchange_repository.get_or_fail_by_name.assert_called_once_with(
+            "Kraken", False
+        )
 
     def test_find_fetch_tickers(self) -> None:
         result = self.finder.find(fetch_tickers=True)
 
         self.assertEqual(result, self.exchange)
-        self.exchange_repository.find_exchange.assert_called_once_with("Kraken", True)
+        self.exchange_repository.get_or_fail_by_name.assert_called_once_with(
+            "Kraken", True
+        )

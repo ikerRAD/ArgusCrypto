@@ -6,7 +6,7 @@ from app.dependency_injection_factories.application.get_all_symbols.get_all_symb
 )
 from app.entrypoints.routes import RouteHandler
 from app.interfaces.api.v1.schemas.symbol_schema import SymbolSchema
-from app.tasks import logger
+from app.main import logger
 
 
 class GetAllSymbolsHandler(RouteHandler):

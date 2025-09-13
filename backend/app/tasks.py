@@ -27,7 +27,7 @@ celery_app.conf.beat_schedule = {
     },
 }
 
-logger = get_task_logger(__name__)
+task_logger = get_task_logger(__name__)
 
 
 @celery_app.task
