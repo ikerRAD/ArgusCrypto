@@ -1,4 +1,4 @@
-from app.dependency_injection_factories.infrastructure.exchange.repositories.db_exchange_repository_factory import (
+from app.dependency_injection_factories.infrastructure.exchange.database.repositories import (
     DbExchangeRepositoryFactory,
 )
 from app.infrastructure.exchange.finders.binance_exchange_finder import (

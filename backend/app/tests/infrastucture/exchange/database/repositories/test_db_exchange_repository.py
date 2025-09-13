@@ -9,7 +9,7 @@ from app.domain.exchange.exceptions.exchange_not_found_exception import (
     ExchangeNotFoundException,
 )
 from app.domain.exchange.models.exchange import Exchange
-from app.infrastructure.exchange.repositories.db_exchange_repository import (
+from app.infrastructure.exchange.database.repositories.db_exchange_repository import (
     DbExchangeRepository,
 )
 

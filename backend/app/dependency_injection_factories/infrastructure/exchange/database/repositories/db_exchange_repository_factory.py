@@ -1,4 +1,4 @@
-from app.infrastructure.exchange.repositories.db_exchange_repository import (
+from app.infrastructure.exchange.database.repositories.db_exchange_repository import (
     DbExchangeRepository,
 )
 

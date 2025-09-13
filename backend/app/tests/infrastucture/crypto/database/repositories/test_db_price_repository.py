@@ -4,7 +4,7 @@ from unittest.mock import patch, Mock
 from sqlalchemy.orm import Session
 
 from app.domain.crypto.models.price import Price
-from app.infrastructure.crypto.repositories.db_price_repository import DbPriceRepository
+from app.infrastructure.crypto.database.repositories.db_price_repository import DbPriceRepository
 
 
 class TestDbPriceRepository(TestCase):
