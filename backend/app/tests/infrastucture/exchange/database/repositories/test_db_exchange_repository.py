@@ -12,34 +12,45 @@ from app.domain.exchange.models.exchange import Exchange
 from app.infrastructure.exchange.database.repositories.db_exchange_repository import (
     DbExchangeRepository,
 )
+from app.infrastructure.exchange.database.table_models import ExchangeTableModel
+from app.infrastructure.exchange.database.translators.db_exchange_translator import (
+    DbExchangeTranslator,
+)
 
 
-class TestDbBinanceRepository(TestCase):
+class TestDbExchangeRepository(TestCase):
     def setUp(self) -> None:
         self.exchange = Exchange(name="Binance")
+        self.exchange_table_model = ExchangeTableModel(name="Binance")
+        self.db_exchange_translator = Mock(spec=DbExchangeTranslator)
 
-        self.repository = DbExchangeRepository()
+        self.repository = DbExchangeRepository(self.db_exchange_translator)
 
     @patch(
-        "app.infrastructure.exchange.repositories.db_exchange_repository.get_session"
+        "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
     def test_find_exchange(self, get_session: Mock) -> None:
         query_result = Mock(spec=Result)
-        query_result.scalar_one_or_none.return_value = self.exchange
+        query_result.scalar_one_or_none.return_value = self.exchange_table_model
         session = Mock(spec=Session)
         session.execute.return_value = query_result
         get_session.return_value.__enter__.return_value = session
+        self.db_exchange_translator.translate_to_domain_model.return_value = (
+            self.exchange
+        )
 
         result = self.repository.find_exchange("Binance", False)
 
         self.assertEqual(result, self.exchange)
-        self.assertEqual(result.tickers, [])
-
+        self.assertEqual(result.tickers, None)
+        self.db_exchange_translator.translate_to_domain_model.assert_called_once_with(
+            self.exchange_table_model, False
+        )
         query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()
 
     @patch(
-        "app.infrastructure.exchange.repositories.db_exchange_repository.get_session"
+        "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
     def test_find_exchange_fetching_tickers(self, get_session: Mock) -> None:
         tickers = [
@@ -49,8 +60,11 @@ class TestDbBinanceRepository(TestCase):
             Ticker(symbol_id=4, exchange_id=1, ticker="HERE"),
         ]
         self.exchange.tickers = tickers
+        self.db_exchange_translator.translate_to_domain_model.return_value = (
+            self.exchange
+        )
         query_result = Mock(spec=Result)
-        query_result.scalar_one_or_none.return_value = self.exchange
+        query_result.scalar_one_or_none.return_value = self.exchange_table_model
         session = Mock(spec=Session)
         session.execute.return_value = query_result
         get_session.return_value.__enter__.return_value = session
@@ -59,12 +73,14 @@ class TestDbBinanceRepository(TestCase):
 
         self.assertEqual(result, self.exchange)
         self.assertEqual(result.tickers, tickers)
-
+        self.db_exchange_translator.translate_to_domain_model.assert_called_once_with(
+            self.exchange_table_model, True
+        )
         query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()
 
     @patch(
-        "app.infrastructure.exchange.repositories.db_exchange_repository.get_session"
+        "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
     def test_find_exchange_not_found(self, get_session: Mock) -> None:
         query_result = Mock(spec=Result)
@@ -78,5 +94,6 @@ class TestDbBinanceRepository(TestCase):
         ):
             self.repository.find_exchange("Some", False)
 
+        self.db_exchange_translator.translate_to_domain_model.assert_not_called()
         query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()

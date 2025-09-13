@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 from dataclasses import dataclass, field
+
+from app.domain.crypto.models.ticker import Ticker
 
 
 @dataclass
 class Exchange:
     name: str
     id: None | int = field(default=None)
-    tickers: list[Ticker] = field(default_factory=list)
+    tickers: None | list[Ticker] = field(default=None)

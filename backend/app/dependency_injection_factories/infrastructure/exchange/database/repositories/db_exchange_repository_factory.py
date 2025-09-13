@@ -1,3 +1,6 @@
+from app.dependency_injection_factories.infrastructure.exchange.database.translators.db_exchange_translator_factory import (
+    DbExchangeTranslatorFactory,
+)
 from app.infrastructure.exchange.database.repositories.db_exchange_repository import (
     DbExchangeRepository,
 )
@@ -6,4 +9,4 @@ from app.infrastructure.exchange.database.repositories.db_exchange_repository im
 class DbExchangeRepositoryFactory:
     @staticmethod
     def create() -> DbExchangeRepository:
-        return DbExchangeRepository()
+        return DbExchangeRepository(DbExchangeTranslatorFactory.create())

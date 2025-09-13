@@ -20,7 +20,5 @@ class DbPriceTranslator:
 
         if domain_price.id is not None:
             price_table_model.id = domain_price.id
-        if domain_price.ticker is not None:
-            price_table_model.ticker = domain_price.ticker
 
         return price_table_model
