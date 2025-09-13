@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from app.domain.crypto.models import Ticker, Price
+from app.domain.crypto.models.price import Price
+from app.domain.crypto.models.ticker import Ticker
 
 
 class ExchangeClient(ABC):

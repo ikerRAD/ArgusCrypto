@@ -1,15 +1,8 @@
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship
-
-from app.db import BaseModel
+from dataclasses import dataclass, field
 
 
-class Symbol(BaseModel):
-    __tablename__ = "symbols"
-
-    name = Column(String, nullable=False)
-    symbol = Column(String, nullable=False, unique=True)
-
-    tickers = relationship(
-        "Ticker", back_populates="symbol", cascade="all, delete-orphan"
-    )
+@dataclass
+class Symbol:
+    name: str
+    symbol: str
+    id: None | int = field(default=None)

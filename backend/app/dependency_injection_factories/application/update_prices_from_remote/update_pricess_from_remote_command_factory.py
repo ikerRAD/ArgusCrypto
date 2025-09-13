@@ -1,7 +1,7 @@
 from app.application.update_prices_from_remote.update_prices_from_remote_command import (
     UpdatePricesFromRemoteCommand,
 )
-from app.dependency_injection_factories.infrastructure.crypto.repositories.db_price_repository_factory import (
+from app.dependency_injection_factories.infrastructure.crypto.database.repositories.db_price_repository_factory import (
     DbPriceRepositoryFactory,
 )
 from app.dependency_injection_factories.infrastructure.exchange.clients.binance_client_factory import (

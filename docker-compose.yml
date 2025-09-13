@@ -54,7 +54,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     depends_on:
-      - backend
       - rabbitmq
     env_file:
       - .env
@@ -69,7 +68,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     depends_on:
-      - backend
       - rabbitmq
     env_file:
       - .env

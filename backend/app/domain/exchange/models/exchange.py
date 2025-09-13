@@ -1,14 +1,10 @@
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship
+from dataclasses import dataclass, field
 
-from app.db import BaseModel
+from app.domain.crypto.models.ticker import Ticker
 
 
-class Exchange(BaseModel):
-    __tablename__ = "exchanges"
-
-    name = Column(String, nullable=False, unique=True)
-
-    tickers = relationship(
-        "Ticker", back_populates="exchange", cascade="all, delete-orphan"
-    )
+@dataclass
+class Exchange:
+    name: str
+    id: None | int = field(default=None)
+    tickers: None | list[Ticker] = field(default=None)

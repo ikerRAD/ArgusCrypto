@@ -26,10 +26,10 @@ def get_session() -> Generator[Session, None, None]:
 Base = declarative_base()
 
 
-class BaseModel(Base):
+class BaseTableModel(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True, autoincrement=True)
 
 
-from app.domain.crypto.models import *  # noqa: F401
-from app.domain.exchange.models import *  # noqa: F401
+from app.infrastructure.crypto.database.table_models import *  # noqa: F401
+from app.infrastructure.exchange.database.table_models import *  # noqa: F401
