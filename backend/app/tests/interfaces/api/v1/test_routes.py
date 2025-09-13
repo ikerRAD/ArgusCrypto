@@ -16,16 +16,22 @@ from app.main import app
 class TestRoutes(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.engine = create_engine('sqlite:///:memory:', connect_args={"check_same_thread": False}, poolclass=StaticPool)
+        cls.engine = create_engine(
+            "sqlite:///:memory:",
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
         cls.TestingSessionLocal = sessionmaker(bind=cls.engine, expire_on_commit=False)
         Base.metadata.create_all(bind=cls.engine)
 
         with cls.TestingSessionLocal() as session:
-            session.add_all([
-                SymbolTableModel(id=1, name="Bitcoin", symbol="BTC"),
-                SymbolTableModel(id=2, name="Ethereum", symbol="ETH"),
-                SymbolTableModel(id=3, name="Cardano", symbol="ADA")
-            ])
+            session.add_all(
+                [
+                    SymbolTableModel(id=1, name="Bitcoin", symbol="BTC"),
+                    SymbolTableModel(id=2, name="Ethereum", symbol="ETH"),
+                    SymbolTableModel(id=3, name="Cardano", symbol="ADA"),
+                ]
+            )
             session.commit()
 
     def setUp(self) -> None:
@@ -52,19 +58,24 @@ class TestRoutes(TestCase):
 
     def test_get_all_symbols(self) -> None:
         expected_status_code = 200
-        expected_content =[{"id": 1, "name": "Bitcoin", "symbol": "BTC"}, {"id": 2, "name": "Ethereum", "symbol":"ETH"},{"id":3,"name":"Cardano","symbol":"ADA"}]
-
+        expected_content = [
+            {"id": 1, "name": "Bitcoin", "symbol": "BTC"},
+            {"id": 2, "name": "Ethereum", "symbol": "ETH"},
+            {"id": 3, "name": "Cardano", "symbol": "ADA"},
+        ]
 
         response = self.client.get("/v1/symbols")
 
         self.assertEqual(response.status_code, expected_status_code)
         self.assertEqual(response.json(), expected_content)
 
-    @patch("app.dependency_injection_factories.application.get_all_symbols.get_all_symbols_query_factory.GetAllSymbolsQueryFactory.create")
+    @patch(
+        "app.dependency_injection_factories.application.get_all_symbols.get_all_symbols_query_factory.GetAllSymbolsQueryFactory.create"
+    )
     def test_get_all_symbols_fail(self, get_all_symbols_query_create: Mock) -> None:
         get_all_symbols_query_create.return_value.execute.side_effect = Exception()
         expected_status_code = 500
-        expected_content = {'detail': 'An unexpected error happened.'}
+        expected_content = {"detail": "An unexpected error happened."}
 
         response = self.client.get("/v1/symbols")
 

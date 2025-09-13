@@ -11,7 +11,6 @@ from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 from app.infrastructure.exchange.database.translators.db_exchange_translator import (
     DbExchangeTranslator,
 )
-from app.tasks import logger
 
 
 class DbExchangeRepository(ExchangeRepository):

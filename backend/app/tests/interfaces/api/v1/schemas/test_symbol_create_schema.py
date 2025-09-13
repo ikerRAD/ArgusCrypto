@@ -6,6 +6,8 @@ from app.interfaces.api.v1.schemas.symbol_create_schema import SymbolCreateSchem
 
 class TestSymbolCreateSchema(TestCase):
     def test_to_domain(self) -> None:
-        result = SymbolCreateSchema.to_domain(SymbolCreateSchema(name="test", symbol="TST"))
+        result = SymbolCreateSchema.to_domain(
+            SymbolCreateSchema(name="test", symbol="TST")
+        )
 
         self.assertEqual(result, Symbol(name="test", symbol="TST"))
