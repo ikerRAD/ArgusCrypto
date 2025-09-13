@@ -1,1 +1,1 @@
-from .db_exchange import DbExchange
+from .exchange_table_model import ExchangeTableModel

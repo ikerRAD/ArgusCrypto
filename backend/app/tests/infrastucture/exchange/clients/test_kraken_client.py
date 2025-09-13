@@ -10,7 +10,9 @@ from app.infrastructure.exchange.clients.kraken_client import KrakenClient
 class TestKrakenClient(TestCase):
     def setUp(self) -> None:
         self.xbtusdt_ticker = Ticker(id=3, ticker="XBTUSDT", symbol_id=1, exchange_id=2)
-        self.xxbtzeur_ticker = Ticker(id=4, ticker="XXBTZEUR", symbol_id=2, exchange_id=2)
+        self.xxbtzeur_ticker = Ticker(
+            id=4, ticker="XXBTZEUR", symbol_id=2, exchange_id=2
+        )
 
         self.client = KrakenClient("http://kraken.example.test")
 

@@ -26,7 +26,7 @@ def get_session() -> Generator[Session, None, None]:
 Base = declarative_base()
 
 
-class BaseModel(Base):
+class BaseTableModel(Base):
     __abstract__ = True
     id = Column(Integer, primary_key=True, autoincrement=True)
 

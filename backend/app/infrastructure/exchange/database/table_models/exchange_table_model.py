@@ -1,14 +1,14 @@
 from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
 
-from app.db import BaseModel
+from app.db import BaseTableModel
 
 
-class DbExchange(BaseModel):
+class ExchangeTableModel(BaseTableModel):
     __tablename__ = "exchanges"
 
     name = Column(String, nullable=False, unique=True)
 
     tickers = relationship(
-        "Ticker", back_populates="exchange", cascade="all, delete-orphan"
+        "TickerTableModel", back_populates="exchange", cascade="all, delete-orphan"
     )

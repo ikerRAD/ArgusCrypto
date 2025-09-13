@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint, String
 from sqlalchemy.orm import relationship
 
-from app.db import BaseModel
+from app.db import BaseTableModel
 
 
-class DbTicker(BaseModel):
+class TickerTableModel(BaseTableModel):
     __tablename__ = "tickers"
 
     symbol_id = Column(
@@ -16,11 +16,11 @@ class DbTicker(BaseModel):
     ticker = Column(String, nullable=False)
 
     prices = relationship(
-        "Price", back_populates="ticker", cascade="all, delete-orphan"
+        "PriceTableModel", back_populates="ticker", cascade="all, delete-orphan"
     )
 
-    symbol = relationship("Symbol", back_populates="tickers")
-    exchange = relationship("Exchange", back_populates="tickers")
+    symbol = relationship("SymbolTableModel", back_populates="tickers")
+    exchange = relationship("ExchangeTableModel", back_populates="tickers")
 
     __table_args__ = (
         UniqueConstraint("exchange_id", "ticker", name="unique_exchange_ticker"),
