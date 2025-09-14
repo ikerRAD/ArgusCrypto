@@ -22,7 +22,7 @@ class GetSymbolByIdHandler(RouteHandler):
             response = self.__query.execute(symbol_id)
 
             return SymbolSchema.from_domain(response.symbol)
-        except SymbolNotFoundException as e:
+        except SymbolNotFoundException:
             logger.error(f"Symbol with id '{symbol_id}' not found")
             raise HTTPException(status_code=404, detail="Symbol not found")
         except Exception as e:
