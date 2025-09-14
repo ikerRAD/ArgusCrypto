@@ -7,7 +7,7 @@ from sqlalchemy.orm import sessionmaker
 from starlette.testclient import TestClient
 
 from app.db import Base
-from app.infrastructure.crypto.database.table_models import SymbolTableModel
+from app.infrastructure.crypto.database.table_models import SymbolTableModel, TickerTableModel
 from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 from app.main import app
 
@@ -45,6 +45,14 @@ class TestRoutes(TestCase):
                 [
                     ExchangeTableModel(id=1, name="Binance"),
                     ExchangeTableModel(id=2, name="Kraken"),
+                ]
+            )
+            session.commit()
+
+            session.add_all(
+                [
+                    TickerTableModel(id=1, ticker="BTCUSDT", exchange_id=1, symbol_id=1),
+                    TickerTableModel(id=2, ticker="BTCEUR", exchange_id=1, symbol_id=1),
                 ]
             )
             session.commit()
@@ -255,6 +263,70 @@ class TestRoutes(TestCase):
         expected_content = {"detail": "An unexpected error happened."}
 
         response = self.client.get("/v1/exchanges/11")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_tickers_by_exchange_id(self) -> None:
+        expected_status_code = 200
+        expected_content = [
+  {
+    "id": 1,
+    "symbol_id": 1,
+    "exchange_id": 1,
+    "ticker": "BTCUSDT"
+  },
+  {
+    "id": 2,
+    "symbol_id": 1,
+    "exchange_id": 1,
+    "ticker": "BTCEUR"
+  }
+]
+
+        response = self.client.get("/v1/exchanges/1/tickers")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertCountEqual(expected_content, response.json())
+
+    def test_get_tickers_by_exchange_id_invalid_id(self) -> None:
+        expected_status_code = 422
+        expected_content = {
+            "detail": [
+                {
+                    "type": "int_parsing",
+                    "loc": ["path", "exchange_id"],
+                    "msg": "Input should be a valid integer, unable to parse string as an integer",
+                    "input": "1aq",
+                }
+            ]
+        }
+
+        response = self.client.get("/v1/exchanges/1aq/tickers")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_tickers_by_exchanges_id_not_found(self) -> None:
+        expected_status_code = 404
+        expected_content = {"detail": "Exchange not found"}
+
+        response = self.client.get("/v1/exchanges/8000/tickers")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query_factory.GetAllTickersByExchangeIdQueryFactory.create"
+    )
+    def test_get_tickers_by_exchanges_id_fail(
+        self, get_all_tickers_by_exchange_id_query: Mock
+    ) -> None:
+        get_all_tickers_by_exchange_id_query.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.get("/v1/exchanges/11/tickers")
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())

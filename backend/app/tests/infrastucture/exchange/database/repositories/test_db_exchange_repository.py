@@ -90,7 +90,7 @@ class TestDbExchangeRepository(TestCase):
         get_session.return_value.__enter__.return_value = session
 
         with self.assertRaisesRegex(
-            ExchangeNotFoundException, "exchange with name 'Some' not found'"
+            ExchangeNotFoundException, "exchange with name 'Some' not found"
         ):
             self.repository.get_or_fail_by_name("Some", False)
 
@@ -155,7 +155,7 @@ class TestDbExchangeRepository(TestCase):
         get_session.return_value.__enter__.return_value = session
 
         with self.assertRaisesRegex(
-            ExchangeNotFoundException, "exchange with id '1000' not found'"
+            ExchangeNotFoundException, "exchange with id '1000' not found"
         ):
             self.repository.get_or_fail_by_id(1000)
 
