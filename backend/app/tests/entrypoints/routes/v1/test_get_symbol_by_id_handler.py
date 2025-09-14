@@ -38,11 +38,11 @@ class TestGetSymbolByIdHandler(TestCase):
     def test_handle_not_found(self, logger: Mock) -> None:
         self.query.execute.side_effect = SymbolNotFoundException(12)
 
-        with self.assertRaises(HTTPException) as e:
+        with self.assertRaises(HTTPException) as context:
             self.handler.handle(12)
 
-            self.assertEqual(e.exception.status_code, 404)
-            self.assertEqual(e.exception.detail, "Symbol not found")
+            self.assertEqual(context.exception.status_code, 404)
+            self.assertEqual(context.exception.detail, "Symbol not found")
             logger.error.assert_called_once_with("Symbol with id '12' not found")
 
         logger.info.assert_called_once_with("Getting symbol with id '12' from database")
@@ -51,13 +51,13 @@ class TestGetSymbolByIdHandler(TestCase):
     def test_handle_unexpected_error(self, logger: Mock) -> None:
         self.query.execute.side_effect = Exception()
 
-        with self.assertRaises(HTTPException) as e:
+        with self.assertRaises(HTTPException) as context:
             self.handler.handle(1)
 
-            self.assertEqual(e.exception.status_code, 500)
-            self.assertEqual(e.exception.detail, "An unexpected error happened.")
+            self.assertEqual(context.exception.status_code, 500)
+            self.assertEqual(context.exception.detail, "An unexpected error happened.")
             logger.error.assert_called_once_with(
-                f"Unexpected error occurred while retrieving symbol with id '1': {e.exception}"
+                f"Unexpected error occurred while retrieving symbol with id '1': {context.exception}"
             )
 
         logger.info.assert_called_once_with("Getting symbol with id '1' from database")

@@ -37,3 +37,13 @@ class DbExchangeRepository(ExchangeRepository):
         return self.__db_exchange_translator.translate_to_domain_model(
             exchange_table_model, fetch_tickers
         )
+
+    def get_all(self) -> list[Exchange]:
+        with get_session() as session:
+            query_result = session.execute(select(ExchangeTableModel))
+
+            exchange_table_models = query_result.scalars().all()
+
+        return self.__db_exchange_translator.bulk_translate_to_domain_model(
+            exchange_table_models
+        )

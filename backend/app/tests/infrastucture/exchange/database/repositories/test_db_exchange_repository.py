@@ -97,3 +97,24 @@ class TestDbExchangeRepository(TestCase):
         self.db_exchange_translator.translate_to_domain_model.assert_not_called()
         query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()
+
+
+
+    @patch(
+        "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
+    )
+    def test_get_all(self, get_session: Mock) -> None:
+        query_result = Mock(spec=Result)
+        query_result.scalars.return_value.all.return_value = [self.exchange_table_model]
+        session = Mock(spec=Session)
+        session.execute.return_value = query_result
+        get_session.return_value.__enter__.return_value = session
+        self.db_exchange_translator.bulk_translate_to_domain_model.return_value = [self.exchange]
+
+        result = self.repository.get_all()
+
+        self.assertEqual(result, [self.exchange])
+        self.db_exchange_translator.bulk_translate_to_domain_model.assert_called_once_with([self.exchange_table_model])
+        query_result.scalars.assert_called_once()
+        query_result.scalars.return_value.all.assert_called_once()
+        session.execute.assert_called_once()

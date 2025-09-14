@@ -25,3 +25,11 @@ class DbExchangeTranslator:
             )
 
         return domain_exchange
+
+    def bulk_translate_to_domain_model(
+        self, exchange_table_models: list[ExchangeTableModel]
+    ) -> list[Exchange]:
+        return [
+            self.translate_to_domain_model(exchange_table_model)
+            for exchange_table_model in exchange_table_models
+        ]
