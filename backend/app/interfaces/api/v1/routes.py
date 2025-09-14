@@ -3,6 +3,8 @@ from fastapi import APIRouter, status
 from app.interfaces.api.v1.schemas.exchange_schema import ExchangeSchema
 from app.interfaces.api.v1.schemas.symbol_create_schema import SymbolCreateSchema
 from app.interfaces.api.v1.schemas.symbol_schema import SymbolSchema
+from app.interfaces.api.v1.schemas.ticker_create_schema import TickerCreateSchema
+from app.interfaces.api.v1.schemas.ticker_schema import TickerSchema
 
 router_v1 = APIRouter()
 
@@ -88,3 +90,59 @@ def get_exchange_by_id(exchange_id: int):
 
     handler = GetExchangeByIdHandler()
     return handler.handle(exchange_id)
+
+
+@router_v1.get(
+    "/exchanges/{exchange_id}/tickers",
+    response_model=list[TickerSchema],
+    responses={
+        404: {
+            "description": "Exchange not found",
+            "content": {
+                "application/json": {"example": {"detail": "Exchange not found"}}
+            },
+        }
+    },
+    tags=["Tickers"],
+)
+def get_all_tickers_by_exchange_id(exchange_id: int):
+    pass
+
+
+@router_v1.get(
+    "/tickers/{ticker_id}",
+    response_model=TickerSchema,
+    responses={
+        404: {
+            "description": "Ticker not found",
+            "content": {
+                "application/json": {"example": {"detail": "Ticker not found"}}
+            },
+        }
+    },
+    tags=["Tickers"],
+)
+def get_ticker_by_id(ticker_id: int):
+    pass
+
+
+@router_v1.post(
+    "/tickers",
+    status_code=status.HTTP_201_CREATED,
+    response_model=TickerSchema,
+    responses={
+        409: {
+            "description": "Ticker already exists for exchange",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "Ticker 'BTCUSD' already exists for exchange with id '1'"
+                    }
+                }
+            },
+        }
+    },
+    tags=["Tickers"],
+)
+def post_ticker(symbol: TickerCreateSchema):
+    pass
