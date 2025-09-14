@@ -8,6 +8,7 @@ from starlette.testclient import TestClient
 
 from app.db import Base
 from app.infrastructure.crypto.database.table_models import SymbolTableModel
+from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 from app.main import app
 
 import app.db as db
@@ -36,6 +37,14 @@ class TestRoutes(TestCase):
                     SymbolTableModel(id=1, name="Bitcoin", symbol="BTC"),
                     SymbolTableModel(id=2, name="Ethereum", symbol="ETH"),
                     SymbolTableModel(id=3, name="Cardano", symbol="ADA"),
+                ]
+            )
+            session.commit()
+
+            session.add_all(
+                [
+                    ExchangeTableModel(id=1, name="Binance"),
+                    ExchangeTableModel(id=2, name="Kraken"),
                 ]
             )
             session.commit()
@@ -173,6 +182,79 @@ class TestRoutes(TestCase):
         response = self.client.post(
             "/v1/symbols", content='{"name": "Shiva Inu", "symbol": "SHIV"}'
         )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_exchanges(self) -> None:
+        expected_status_code = 200
+        expected_content = [{"id": 1, "name": "Binance"}, {"id": 2, "name": "Kraken"}]
+
+        response = self.client.get("/v1/exchanges")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.get_all_exchanges.get_all_exchanges_query_factory.GetAllExchangesQueryFactory.create"
+    )
+    def test_get_all_exchanges_fail(self, get_all_exchanges_query_create: Mock) -> None:
+        get_all_exchanges_query_create.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.get("/v1/exchanges")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_exchange_by_id(self) -> None:
+        expected_status_code = 200
+        expected_content = {"id": 1, "name": "Binance"}
+
+        response = self.client.get("/v1/exchanges/1")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_exchange_by_id_invalid_id(self) -> None:
+        expected_status_code = 422
+        expected_content = {
+            "detail": [
+                {
+                    "type": "int_parsing",
+                    "loc": ["path", "exchange_id"],
+                    "msg": "Input should be a valid integer, unable to parse string as an integer",
+                    "input": "1aq",
+                }
+            ]
+        }
+
+        response = self.client.get("/v1/exchanges/1aq")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_exchanges_by_id_not_found(self) -> None:
+        expected_status_code = 404
+        expected_content = {"detail": "Exchange not found"}
+
+        response = self.client.get("/v1/exchanges/8000")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.get_exchange_by_id.get_exchange_by_id_query_factory.GetExchangeByIdQueryFactory.create"
+    )
+    def test_get_exchanges_by_id_fail(
+        self, get_exchange_by_id_query_create: Mock
+    ) -> None:
+        get_exchange_by_id_query_create.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.get("/v1/exchanges/11")
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())

@@ -44,11 +44,11 @@ class TestPostSymbolHandler(TestCase):
         )
         symbol_create = SymbolCreateSchema(name="Bitcoin", symbol="BTC")
 
-        with self.assertRaises(HTTPException) as e:
+        with self.assertRaises(HTTPException) as context:
             self.handler.handle(symbol_create)
 
-            self.assertEqual(e.exception.status_code, 409)
-            self.assertEqual(e.exception.detail, "Symbol 'BTC' already exists'")
+            self.assertEqual(context.exception.status_code, 409)
+            self.assertEqual(context.exception.detail, "Symbol 'BTC' already exists'")
             logger.error.assert_called_once_with("Symbol 'BTC' already exists'")
 
         self.create_symbol_command.execute.assert_called_once_with(symbol_create)
@@ -59,13 +59,13 @@ class TestPostSymbolHandler(TestCase):
         self.create_symbol_command.execute.side_effect = Exception()
         symbol_create = SymbolCreateSchema(name="test", symbol="TST")
 
-        with self.assertRaises(HTTPException) as e:
+        with self.assertRaises(HTTPException) as context:
             self.handler.handle(symbol_create)
 
-            self.assertEqual(e.exception.status_code, 500)
-            self.assertEqual(e.exception.detail, "An unexpected error happened.")
+            self.assertEqual(context.exception.status_code, 500)
+            self.assertEqual(context.exception.detail, "An unexpected error happened.")
             logger.error.assert_called_once_with(
-                f"An unexpected error happened creating the symbol 'TST': {e.exception}"
+                f"An unexpected error happened creating the symbol 'TST': {context.exception}"
             )
 
         self.create_symbol_command.execute.assert_called_once_with(symbol_create)

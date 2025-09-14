@@ -37,13 +37,13 @@ class TestGetAllSymbolsHandler(TestCase):
     def test_handle_unexpected_error(self, logger: Mock) -> None:
         self.get_all_symbols_query.execute.side_effect = Exception()
 
-        with self.assertRaises(HTTPException) as e:
+        with self.assertRaises(HTTPException) as context:
             self.handler.handle()
 
-            self.assertEqual(e.exception.status_code, 500)
-            self.assertEqual(e.exception.detail, "An unexpected error happened.")
+            self.assertEqual(context.exception.status_code, 500)
+            self.assertEqual(context.exception.detail, "An unexpected error happened.")
             logger.error.assert_called_once_with(
-                f"An unexpected error happened while retrieving all symbols: {e.exception}"
+                f"An unexpected error happened while retrieving all symbols: {context.exception}"
             )
 
         self.get_all_symbols_query.execute.assert_called_once()

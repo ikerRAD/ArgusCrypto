@@ -32,8 +32,36 @@ class DbExchangeRepository(ExchangeRepository):
             )
 
             if exchange_table_model is None:
-                raise ExchangeNotFoundException(exchange_name)
+                raise ExchangeNotFoundException("name", exchange_name)
 
         return self.__db_exchange_translator.translate_to_domain_model(
             exchange_table_model, fetch_tickers
+        )
+
+    def get_all(self) -> list[Exchange]:
+        with get_session() as session:
+            query_result = session.execute(select(ExchangeTableModel))
+
+            exchange_table_models = query_result.scalars().all()
+
+        return self.__db_exchange_translator.bulk_translate_to_domain_model(
+            exchange_table_models
+        )
+
+    def get_or_fail_by_id(self, exchange_id: int) -> Exchange:
+        with get_session() as session:
+            statement = select(ExchangeTableModel).where(
+                ExchangeTableModel.id == exchange_id
+            )
+
+            query_result = session.execute(statement)
+            exchange_table_model: ExchangeTableModel | None = (
+                query_result.scalar_one_or_none()
+            )
+
+            if exchange_table_model is None:
+                raise ExchangeNotFoundException("id", exchange_id)
+
+        return self.__db_exchange_translator.translate_to_domain_model(
+            exchange_table_model
         )

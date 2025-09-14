@@ -50,3 +50,18 @@ class TestDbExchangeTranslator(TestCase):
         self.db_ticker_translator.bulk_translate_to_domain_model.assert_called_once_with(
             ticker_table_models
         )
+
+    def test_bulk_translate_to_domain_model(self) -> None:
+        exchange_table_models = [
+            ExchangeTableModel(name="Kraken"),
+            ExchangeTableModel(id=1, name="Binance"),
+        ]
+        expected_domain_exchanges = [
+            Exchange(name="Kraken"),
+            Exchange(id=1, name="Binance"),
+        ]
+
+        result = self.translator.bulk_translate_to_domain_model(exchange_table_models)
+
+        self.assertEqual(result, expected_domain_exchanges)
+        self.db_ticker_translator.bulk_translate_to_domain_model.assert_not_called()
