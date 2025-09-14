@@ -20,11 +20,13 @@ class PostSymbolHandler(RouteHandler):
     def handle(self, symbol_schema: SymbolCreateSchema) -> SymbolSchema:
         try:
             logger.info(f"Creating symbol '{symbol_schema.symbol}'")
-            response = self.__command.execute(symbol_schema)
+            response = self.__command.execute(
+                SymbolCreateSchema.to_domain(symbol_schema)
+            )
 
             return SymbolSchema.from_domain(response.created_symbol)
         except SymbolAlreadyExistsException:
-            logger.error(f"Symbol '{symbol_schema.symbol}' already exists'")
+            logger.error(f"Symbol '{symbol_schema.symbol}' already exists")
             raise HTTPException(
                 status_code=409,
                 detail=f"Symbol '{symbol_schema.symbol}' already exists",

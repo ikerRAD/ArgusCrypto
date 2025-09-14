@@ -18,3 +18,15 @@ class DbTickerTranslator:
             exchange_id=ticker_table_model.exchange_id,
             ticker=ticker_table_model.ticker,
         )
+
+    def translate_to_table_model(self, domain_ticker: Ticker) -> TickerTableModel:
+        ticker_table_model = TickerTableModel(
+            ticker=domain_ticker.ticker,
+            exchange_id=domain_ticker.exchange_id,
+            symbol_id=domain_ticker.symbol_id,
+        )
+
+        if domain_ticker.id is not None:
+            ticker_table_model.id = domain_ticker.id
+
+        return ticker_table_model

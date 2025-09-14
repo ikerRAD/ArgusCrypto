@@ -4,6 +4,6 @@ from app.application import Response
 from app.domain.exchange.models.exchange import Exchange
 
 
-@dataclass
+@dataclass(frozen=True)
 class GetExchangeByIdQueryResponse(Response):
     exchange: Exchange
