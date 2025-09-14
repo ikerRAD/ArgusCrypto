@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
@@ -10,6 +11,7 @@ from app.db import Base
 from app.infrastructure.crypto.database.table_models import (
     SymbolTableModel,
     TickerTableModel,
+    PriceTableModel,
 )
 from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 from app.main import app
@@ -65,6 +67,39 @@ class TestRoutes(TestCase):
                         id=1, ticker="BTCUSDT", exchange_id=1, symbol_id=1
                     ),
                     TickerTableModel(id=2, ticker="BTCEUR", exchange_id=1, symbol_id=1),
+                ]
+            )
+            session.commit()
+
+            session.add_all(
+                [
+                    PriceTableModel(
+                        id=1, ticker_id=1, price=10.001, timestamp=datetime(2020, 1, 1)
+                    ),
+                    PriceTableModel(
+                        id=2, ticker_id=1, price=10.002, timestamp=datetime(2020, 1, 2)
+                    ),
+                    PriceTableModel(
+                        id=3, ticker_id=1, price=10.003, timestamp=datetime(2020, 1, 3)
+                    ),
+                    PriceTableModel(
+                        id=4, ticker_id=1, price=10.004, timestamp=datetime(2020, 1, 4)
+                    ),
+                    PriceTableModel(
+                        id=5, ticker_id=1, price=10.003, timestamp=datetime(2020, 1, 5)
+                    ),
+                    PriceTableModel(
+                        id=6, ticker_id=1, price=10.002, timestamp=datetime(2020, 1, 6)
+                    ),
+                    PriceTableModel(
+                        id=7, ticker_id=1, price=10.001, timestamp=datetime(2020, 1, 7)
+                    ),
+                    PriceTableModel(
+                        id=8, ticker_id=1, price=10.0009, timestamp=datetime(2020, 1, 8)
+                    ),
+                    PriceTableModel(
+                        id=9, ticker_id=1, price=10.0008, timestamp=datetime(2020, 1, 9)
+                    ),
                 ]
             )
             session.commit()
@@ -464,6 +499,239 @@ class TestRoutes(TestCase):
             "/v1/tickers",
             content='{"symbol_id": 1,"exchange_id": 1,"ticker": "BTC3USDT3"}',
         )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id(self) -> None:
+        expected_status_code = 200
+        expected_content = [
+            {
+                "id": 1,
+                "ticker_id": 1,
+                "price": 10.001,
+                "timestamp": "2020-01-01T00:00:00",
+            },
+            {
+                "id": 2,
+                "ticker_id": 1,
+                "price": 10.002,
+                "timestamp": "2020-01-02T00:00:00",
+            },
+            {
+                "id": 3,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-03T00:00:00",
+            },
+            {
+                "id": 4,
+                "ticker_id": 1,
+                "price": 10.004,
+                "timestamp": "2020-01-04T00:00:00",
+            },
+            {
+                "id": 5,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-05T00:00:00",
+            },
+            {
+                "id": 6,
+                "ticker_id": 1,
+                "price": 10.002,
+                "timestamp": "2020-01-06T00:00:00",
+            },
+            {
+                "id": 7,
+                "ticker_id": 1,
+                "price": 10.001,
+                "timestamp": "2020-01-07T00:00:00",
+            },
+            {
+                "id": 8,
+                "ticker_id": 1,
+                "price": 10.0009,
+                "timestamp": "2020-01-08T00:00:00",
+            },
+            {
+                "id": 9,
+                "ticker_id": 1,
+                "price": 10.0008,
+                "timestamp": "2020-01-09T00:00:00",
+            },
+        ]
+
+        response = self.client.get("/v1/tickers/1/prices")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id_start_date(self) -> None:
+        expected_status_code = 200
+        expected_content = [
+            {
+                "id": 3,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-03T00:00:00",
+            },
+            {
+                "id": 4,
+                "ticker_id": 1,
+                "price": 10.004,
+                "timestamp": "2020-01-04T00:00:00",
+            },
+            {
+                "id": 5,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-05T00:00:00",
+            },
+            {
+                "id": 6,
+                "ticker_id": 1,
+                "price": 10.002,
+                "timestamp": "2020-01-06T00:00:00",
+            },
+            {
+                "id": 7,
+                "ticker_id": 1,
+                "price": 10.001,
+                "timestamp": "2020-01-07T00:00:00",
+            },
+            {
+                "id": 8,
+                "ticker_id": 1,
+                "price": 10.0009,
+                "timestamp": "2020-01-08T00:00:00",
+            },
+            {
+                "id": 9,
+                "ticker_id": 1,
+                "price": 10.0008,
+                "timestamp": "2020-01-09T00:00:00",
+            },
+        ]
+
+        response = self.client.get(
+            "/v1/tickers/1/prices?start_date=2020-01-03T00:00:00"
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id_end_date(self) -> None:
+        expected_status_code = 200
+        expected_content = [
+            {
+                "id": 1,
+                "ticker_id": 1,
+                "price": 10.001,
+                "timestamp": "2020-01-01T00:00:00",
+            },
+            {
+                "id": 2,
+                "ticker_id": 1,
+                "price": 10.002,
+                "timestamp": "2020-01-02T00:00:00",
+            },
+            {
+                "id": 3,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-03T00:00:00",
+            },
+        ]
+
+        response = self.client.get("/v1/tickers/1/prices?end_date=2020-01-03T00:00:00")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id_start_date_and_end_date(self) -> None:
+        expected_status_code = 200
+        expected_content = [
+            {
+                "id": 3,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-03T00:00:00",
+            },
+            {
+                "id": 4,
+                "ticker_id": 1,
+                "price": 10.004,
+                "timestamp": "2020-01-04T00:00:00",
+            },
+            {
+                "id": 5,
+                "ticker_id": 1,
+                "price": 10.003,
+                "timestamp": "2020-01-05T00:00:00",
+            },
+            {
+                "id": 6,
+                "ticker_id": 1,
+                "price": 10.002,
+                "timestamp": "2020-01-06T00:00:00",
+            },
+            {
+                "id": 7,
+                "ticker_id": 1,
+                "price": 10.001,
+                "timestamp": "2020-01-07T00:00:00",
+            },
+            {
+                "id": 8,
+                "ticker_id": 1,
+                "price": 10.0009,
+                "timestamp": "2020-01-08T00:00:00",
+            },
+        ]
+
+        response = self.client.get(
+            "/v1/tickers/1/prices?start_date=2020-01-03T00:00:00&end_date=2020-01-08T00:00:00"
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id_start_date_and_end_date_incorrect(
+        self,
+    ) -> None:
+        expected_status_code = 400
+        expected_content = {"detail": "start_date must be before end_date"}
+
+        response = self.client.get(
+            "/v1/tickers/1/prices?start_date=2020-01-05T00:00:00&end_date=2020-01-02T00:00:00"
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id_not_found(self) -> None:
+        expected_status_code = 404
+        expected_content = {"detail": "Ticker not found"}
+
+        response = self.client.get("/v1/tickers/10000/prices")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.get_all_prices_by_ticker_id.get_all_prices_by_ticker_id_query_factory.GetAllPricesByTickerIdQueryFactory.create"
+    )
+    def test_get_all_prices_by_ticker_id_fail(
+        self, get_all_prices_by_ticker_id_query_create: Mock
+    ) -> None:
+        get_all_prices_by_ticker_id_query_create.return_value.execute.side_effect = (
+            Exception()
+        )
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.get("/v1/tickers/1/prices")
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())

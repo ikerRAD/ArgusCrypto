@@ -1,6 +1,9 @@
+from datetime import datetime
+
 from fastapi import APIRouter, status
 
 from app.interfaces.api.v1.schemas.exchange_schema import ExchangeSchema
+from app.interfaces.api.v1.schemas.price_schema import PriceSchema
 from app.interfaces.api.v1.schemas.symbol_create_schema import SymbolCreateSchema
 from app.interfaces.api.v1.schemas.symbol_schema import SymbolSchema
 from app.interfaces.api.v1.schemas.ticker_create_schema import TickerCreateSchema
@@ -165,3 +168,35 @@ def post_ticker(symbol: TickerCreateSchema):
 
     handler = PostTickerHandler()
     return handler.handle(symbol)
+
+
+@router_v1.get(
+    "/tickers/{ticker_id}/prices",
+    response_model=list[PriceSchema],
+    responses={
+        400: {
+            "description": "Bad request",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "start_date must be before end_date"}
+                }
+            },
+        },
+        404: {
+            "description": "Ticker not found",
+            "content": {
+                "application/json": {"example": {"detail": "Ticker not found"}}
+            },
+        },
+    },
+    tags=["Prices"],
+)
+def get_all_prices_by_ticker_id(
+    ticker_id: int, start_date: datetime | None = None, end_date: datetime | None = None
+):
+    from app.entrypoints.routes.v1.get_all_prices_by_ticker_id_handler import (
+        GetAllPricesByTickerIdHandler,
+    )
+
+    handler = GetAllPricesByTickerIdHandler()
+    return handler.handle(ticker_id, start_date, end_date)
