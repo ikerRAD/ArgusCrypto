@@ -1,13 +1,16 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 from starlette.testclient import TestClient
 
 from app.db import Base
-from app.infrastructure.crypto.database.table_models import SymbolTableModel, TickerTableModel
+from app.infrastructure.crypto.database.table_models import (
+    SymbolTableModel,
+    TickerTableModel,
+)
 from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 from app.main import app
 
@@ -22,6 +25,13 @@ class TestRoutes(TestCase):
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
         )
+
+        @event.listens_for(cls.engine, "connect")
+        def set_sqlite_pragma(dbapi_connection, connection_record):
+            cursor = dbapi_connection.cursor()
+            cursor.execute("PRAGMA foreign_keys=ON;")
+            cursor.close()
+
         cls.TestingSessionLocal = sessionmaker(bind=cls.engine, expire_on_commit=False)
         Base.metadata.create_all(bind=cls.engine)
 
@@ -51,7 +61,9 @@ class TestRoutes(TestCase):
 
             session.add_all(
                 [
-                    TickerTableModel(id=1, ticker="BTCUSDT", exchange_id=1, symbol_id=1),
+                    TickerTableModel(
+                        id=1, ticker="BTCUSDT", exchange_id=1, symbol_id=1
+                    ),
                     TickerTableModel(id=2, ticker="BTCEUR", exchange_id=1, symbol_id=1),
                 ]
             )
@@ -182,7 +194,7 @@ class TestRoutes(TestCase):
     @patch(
         "app.dependency_injection_factories.application.create_symbol.create_symbol_command_factory.CreateSymbolCommandFactory.create"
     )
-    def test_create_symbol_fail(self, create_symbol_command_create: Mock) -> None:
+    def test_post_symbol_fail(self, create_symbol_command_create: Mock) -> None:
         create_symbol_command_create.return_value.execute.side_effect = Exception()
         expected_status_code = 500
         expected_content = {"detail": "An unexpected error happened."}
@@ -270,19 +282,9 @@ class TestRoutes(TestCase):
     def test_get_tickers_by_exchange_id(self) -> None:
         expected_status_code = 200
         expected_content = [
-  {
-    "id": 1,
-    "symbol_id": 1,
-    "exchange_id": 1,
-    "ticker": "BTCUSDT"
-  },
-  {
-    "id": 2,
-    "symbol_id": 1,
-    "exchange_id": 1,
-    "ticker": "BTCEUR"
-  }
-]
+            {"id": 1, "symbol_id": 1, "exchange_id": 1, "ticker": "BTCUSDT"},
+            {"id": 2, "symbol_id": 1, "exchange_id": 1, "ticker": "BTCEUR"},
+        ]
 
         response = self.client.get("/v1/exchanges/1/tickers")
 
@@ -322,7 +324,9 @@ class TestRoutes(TestCase):
     def test_get_tickers_by_exchanges_id_fail(
         self, get_all_tickers_by_exchange_id_query: Mock
     ) -> None:
-        get_all_tickers_by_exchange_id_query.return_value.execute.side_effect = Exception()
+        get_all_tickers_by_exchange_id_query.return_value.execute.side_effect = (
+            Exception()
+        )
         expected_status_code = 500
         expected_content = {"detail": "An unexpected error happened."}
 
@@ -334,11 +338,11 @@ class TestRoutes(TestCase):
     def test_get_ticker_by_id(self) -> None:
         expected_status_code = 200
         expected_content = {
-  "id": 1,
-  "symbol_id": 1,
-  "exchange_id": 1,
-  "ticker": "BTCUSDT"
-}
+            "id": 1,
+            "symbol_id": 1,
+            "exchange_id": 1,
+            "ticker": "BTCUSDT",
+        }
 
         response = self.client.get("/v1/tickers/1")
 
@@ -381,6 +385,85 @@ class TestRoutes(TestCase):
         expected_content = {"detail": "An unexpected error happened."}
 
         response = self.client.get("/v1/tickers/11")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_post_ticker(self) -> None:
+        expected_status_code = 201
+        expected_content = {
+            "id": 3,
+            "symbol_id": 1,
+            "exchange_id": 1,
+            "ticker": "BTC2USDT2",
+        }
+
+        response = self.client.post(
+            "/v1/tickers",
+            content='{"symbol_id": 1,"exchange_id": 1,"ticker": "BTC2USDT2"}',
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_post_ticker_conflict(self) -> None:
+        expected_status_code = 409
+        expected_content = {
+            "detail": "Ticker 'BTCUSDT' already exists for exchange '1'"
+        }
+
+        response = self.client.post(
+            "/v1/tickers",
+            content='{"symbol_id": 1,"exchange_id": 1,"ticker": "BTCUSDT"}',
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_post_ticker_symbol_id_not_exists(self) -> None:
+        expected_status_code = 400
+        expected_content = {"detail": "symbol_id '1000' is non-existent"}
+
+        response = self.client.post(
+            "/v1/tickers",
+            content='{"symbol_id": 1000,"exchange_id": 1,"ticker": "BTCUSDT1"}',
+        )
+
+        self.assertEqual(expected_content, response.json())
+        self.assertEqual(expected_status_code, response.status_code)
+
+    def test_post_ticker_validation_error(self) -> None:
+        expected_status_code = 422
+        expected_content = {
+            "detail": [
+                {
+                    "input": {"symbol_id": 1, "exchange_id": 1},
+                    "loc": ["body", "ticker"],
+                    "msg": "Field required",
+                    "type": "missing",
+                }
+            ]
+        }
+
+        response = self.client.post(
+            "/v1/tickers", content='{"symbol_id": 1,"exchange_id": 1}'
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.create_ticker.create_ticker_command_factory.CreateTickerCommandFactory.create"
+    )
+    def test_post_ticker_fail(self, create_ticker_command_create: Mock) -> None:
+        create_ticker_command_create.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.post(
+            "/v1/tickers",
+            content='{"symbol_id": 1,"exchange_id": 1,"ticker": "BTC3USDT3"}',
+        )
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())

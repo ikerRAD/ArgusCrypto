@@ -33,7 +33,9 @@ class TestPostSymbolHandler(TestCase):
         result = self.handler.handle(symbol_create)
 
         self.assertEqual(result, SymbolSchema(id=1, name="test", symbol="TST"))
-        self.create_symbol_command.execute.assert_called_once_with(symbol_create)
+        self.create_symbol_command.execute.assert_called_once_with(
+            Symbol(name="test", symbol="TST")
+        )
         logger.info.assert_called_once_with("Creating symbol 'TST'")
         logger.error.assert_not_called()
 
@@ -48,10 +50,12 @@ class TestPostSymbolHandler(TestCase):
             self.handler.handle(symbol_create)
 
             self.assertEqual(context.exception.status_code, 409)
-            self.assertEqual(context.exception.detail, "Symbol 'BTC' already exists'")
-            logger.error.assert_called_once_with("Symbol 'BTC' already exists'")
+            self.assertEqual(context.exception.detail, "Symbol 'BTC' already exists")
+            logger.error.assert_called_once_with("Symbol 'BTC' already exists")
 
-        self.create_symbol_command.execute.assert_called_once_with(symbol_create)
+        self.create_symbol_command.execute.assert_called_once_with(
+            Symbol(name="Bitcoin", symbol="BTC")
+        )
         logger.info.assert_called_once_with("Creating symbol 'BTC'")
 
     @patch("app.entrypoints.routes.v1.post_symbol_handler.logger")
@@ -68,5 +72,7 @@ class TestPostSymbolHandler(TestCase):
                 f"An unexpected error happened creating the symbol 'TST': {context.exception}"
             )
 
-        self.create_symbol_command.execute.assert_called_once_with(symbol_create)
+        self.create_symbol_command.execute.assert_called_once_with(
+            Symbol(name="test", symbol="TST")
+        )
         logger.info.assert_called_once_with("Creating symbol 'TST'")

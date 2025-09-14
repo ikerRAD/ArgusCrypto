@@ -1,6 +1,7 @@
 from app.application import Instruction
-from app.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query_response import \
-    GetAllTickersByExchangeIdQueryResponse
+from app.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query_response import (
+    GetAllTickersByExchangeIdQueryResponse,
+)
 from app.domain.crypto.repositories.ticker_repository import TickerRepository
 
 

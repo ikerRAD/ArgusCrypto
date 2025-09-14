@@ -1,5 +1,7 @@
 from app.application import Instruction
-from app.application.get_ticker_by_id.get_ticker_by_id_query_response import GetTickerByIdQueryResponse
+from app.application.get_ticker_by_id.get_ticker_by_id_query_response import (
+    GetTickerByIdQueryResponse,
+)
 from app.domain.crypto.repositories.ticker_repository import TickerRepository
 
 

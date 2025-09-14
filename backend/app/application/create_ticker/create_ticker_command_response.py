@@ -5,5 +5,5 @@ from app.domain.crypto.models.ticker import Ticker
 
 
 @dataclass(frozen=True)
-class GetAllTickersByExchangeIdQueryResponse(Response):
-    tickers: list[Ticker]
+class CreateTickerCommandResponse(Response):
+    created_ticker: Ticker

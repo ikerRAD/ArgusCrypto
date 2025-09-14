@@ -107,7 +107,7 @@ def get_exchange_by_id(exchange_id: int):
 )
 def get_all_tickers_by_exchange_id(exchange_id: int):
     from app.entrypoints.routes.v1.get_all_tickers_by_exchange_id_handler import (
-        GetAllTickersByExchangeIdHandler
+        GetAllTickersByExchangeIdHandler,
     )
 
     handler = GetAllTickersByExchangeIdHandler()
@@ -128,9 +128,7 @@ def get_all_tickers_by_exchange_id(exchange_id: int):
     tags=["Tickers"],
 )
 def get_ticker_by_id(ticker_id: int):
-    from app.entrypoints.routes.v1.get_ticker_by_id_handler import (
-        GetTickerByIdHandler
-    )
+    from app.entrypoints.routes.v1.get_ticker_by_id_handler import GetTickerByIdHandler
 
     handler = GetTickerByIdHandler()
     return handler.handle(ticker_id)
@@ -150,9 +148,20 @@ def get_ticker_by_id(ticker_id: int):
                     }
                 }
             },
-        }
+        },
+        400: {
+            "description": "symbol_id or exchange_id are non-existent",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "symbol_id '0' is non-existent"}
+                }
+            },
+        },
     },
     tags=["Tickers"],
 )
 def post_ticker(symbol: TickerCreateSchema):
-    pass
+    from app.entrypoints.routes.v1.post_ticker_handler import PostTickerHandler
+
+    handler = PostTickerHandler()
+    return handler.handle(symbol)

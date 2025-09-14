@@ -4,6 +4,6 @@ from app.application import Response
 from app.domain.crypto.models.ticker import Ticker
 
 
-@dataclass
+@dataclass(frozen=True)
 class GetTickerByIdQueryResponse(Response):
     ticker: Ticker

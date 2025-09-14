@@ -1,10 +1,14 @@
 from fastapi import HTTPException
 
-from app.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query import \
-    GetAllTickersByExchangeIdQuery
-from app.dependency_injection_factories.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query_factory import \
-    GetAllTickersByExchangeIdQueryFactory
-from app.domain.exchange.exceptions.exchange_not_found_exception import ExchangeNotFoundException
+from app.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query import (
+    GetAllTickersByExchangeIdQuery,
+)
+from app.dependency_injection_factories.application.get_all_tickers_by_exchange_id.get_all_tickers_by_exchange_id_query_factory import (
+    GetAllTickersByExchangeIdQueryFactory,
+)
+from app.domain.exchange.exceptions.exchange_not_found_exception import (
+    ExchangeNotFoundException,
+)
 from app.entrypoints.routes import RouteHandler
 from app.interfaces.api.v1.schemas.ticker_schema import TickerSchema
 from app.main import logger
@@ -16,7 +20,9 @@ class GetAllTickersByExchangeIdHandler(RouteHandler):
 
     def handle(self, exchange_id: int) -> list[TickerSchema]:
         try:
-            logger.info(f"Getting all tickers for exchange '{exchange_id}' from database")
+            logger.info(
+                f"Getting all tickers for exchange '{exchange_id}' from database"
+            )
             response = self.__query.execute(exchange_id)
 
             return [TickerSchema.from_domain(ticker) for ticker in response.tickers]

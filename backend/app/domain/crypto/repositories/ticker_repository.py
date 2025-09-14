@@ -11,3 +11,7 @@ class TickerRepository(ABC):
     @abstractmethod
     def get_or_fail_by_id(self, ticker_id: int) -> Ticker:
         pass
+
+    @abstractmethod
+    def insert(self, ticker) -> Ticker:
+        pass

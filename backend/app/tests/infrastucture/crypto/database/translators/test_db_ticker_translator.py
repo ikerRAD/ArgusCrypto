@@ -1,5 +1,6 @@
 from unittest import TestCase
 
+from app.domain.crypto.models.ticker import Ticker
 from app.infrastructure.crypto.database.table_models import TickerTableModel
 from app.infrastructure.crypto.database.translators.db_ticker_translator import (
     DbTickerTranslator,
@@ -53,3 +54,23 @@ class TestDbTickerTranslator(TestCase):
         self.assertEqual(result[2].symbol_id, 2)
         self.assertEqual(result[2].ticker, "TICKER")
         self.assertEqual(result[2].exchange_id, 1)
+
+    def test_translate_to_table_model(self) -> None:
+        ticker_domain_model = Ticker(id=1, symbol_id=1, exchange_id=1, ticker="SOME")
+
+        result = self.translator.translate_to_table_model(ticker_domain_model)
+
+        self.assertEqual(result.id, 1)
+        self.assertEqual(result.symbol_id, 1)
+        self.assertEqual(result.ticker, "SOME")
+        self.assertEqual(result.exchange_id, 1)
+
+    def test_translate_to_table_model_without_id(self) -> None:
+        ticker_domain_model = Ticker(symbol_id=1, exchange_id=1, ticker="SOME")
+
+        result = self.translator.translate_to_table_model(ticker_domain_model)
+
+        self.assertIsNone(result.id)
+        self.assertEqual(result.symbol_id, 1)
+        self.assertEqual(result.ticker, "SOME")
+        self.assertEqual(result.exchange_id, 1)
