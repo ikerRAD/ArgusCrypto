@@ -128,7 +128,12 @@ def get_all_tickers_by_exchange_id(exchange_id: int):
     tags=["Tickers"],
 )
 def get_ticker_by_id(ticker_id: int):
-    pass
+    from app.entrypoints.routes.v1.get_ticker_by_id_handler import (
+        GetTickerByIdHandler
+    )
+
+    handler = GetTickerByIdHandler()
+    return handler.handle(ticker_id)
 
 
 @router_v1.post(

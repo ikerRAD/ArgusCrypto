@@ -1,9 +1,11 @@
 from sqlalchemy import select
 
 from app.db import get_session
+from app.domain.crypto.exceptions.ticker_not_found_exception import TickerNotFoundException
 from app.domain.crypto.models.ticker import Ticker
 from app.domain.crypto.repositories.ticker_repository import TickerRepository
 from app.domain.exchange.exceptions.exchange_not_found_exception import ExchangeNotFoundException
+from app.infrastructure.crypto.database.table_models import TickerTableModel
 from app.infrastructure.crypto.database.translators.db_ticker_translator import DbTickerTranslator
 from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 
@@ -27,3 +29,15 @@ class DbTickerRepository(TickerRepository):
         return self.__db_ticker_translator.bulk_translate_to_domain_model(
             ticker_table_models
         )
+
+    def get_or_fail_by_id(self, ticker_id: int) -> Ticker:
+        with get_session() as session:
+            query_result = session.execute(
+                select(TickerTableModel).where(TickerTableModel.id == ticker_id)
+            )
+            ticker_table_model = query_result.scalar_one_or_none()
+
+            if ticker_table_model is None:
+                raise TickerNotFoundException(ticker_id)
+
+        return self.__db_ticker_translator.translate_to_domain_model(ticker_table_model)

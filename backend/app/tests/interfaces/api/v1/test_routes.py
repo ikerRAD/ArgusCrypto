@@ -330,3 +330,57 @@ class TestRoutes(TestCase):
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())
+
+    def test_get_ticker_by_id(self) -> None:
+        expected_status_code = 200
+        expected_content = {
+  "id": 1,
+  "symbol_id": 1,
+  "exchange_id": 1,
+  "ticker": "BTCUSDT"
+}
+
+        response = self.client.get("/v1/tickers/1")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_ticker_by_id_invalid_id(self) -> None:
+        expected_status_code = 422
+        expected_content = {
+            "detail": [
+                {
+                    "type": "int_parsing",
+                    "loc": ["path", "ticker_id"],
+                    "msg": "Input should be a valid integer, unable to parse string as an integer",
+                    "input": "1aq",
+                }
+            ]
+        }
+
+        response = self.client.get("/v1/tickers/1aq")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_ticker_by_id_not_found(self) -> None:
+        expected_status_code = 404
+        expected_content = {"detail": "Ticker not found"}
+
+        response = self.client.get("/v1/tickers/8000")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.get_ticker_by_id.get_ticker_by_id_query_factory.GetTickerByIdQueryFactory.create"
+    )
+    def test_get_ticker_by_id_fail(self, get_ticker_by_id_query_create: Mock) -> None:
+        get_ticker_by_id_query_create.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.get("/v1/tickers/11")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())

@@ -4,6 +4,7 @@ from unittest.mock import patch, Mock
 from sqlalchemy import Result
 from sqlalchemy.orm import Session
 
+from app.domain.crypto.exceptions.ticker_not_found_exception import TickerNotFoundException
 from app.domain.crypto.models.ticker import Ticker
 from app.domain.exchange.exceptions.exchange_not_found_exception import ExchangeNotFoundException
 from app.infrastructure.crypto.database.repositories.db_ticker_repository import DbTickerRepository
@@ -59,6 +60,47 @@ class TestDbTickerRepository(TestCase):
                 ExchangeNotFoundException, "exchange with id '1000' not found"
         ):
             self.repository.get_all_or_fail_by_exchange_id(1000)
+
+        self.db_ticker_translator.translate_to_domain_model.assert_not_called()
+        query_result.scalar_one_or_none.assert_called_once()
+        session.execute.assert_called_once()
+
+    @patch(
+        "app.infrastructure.crypto.database.repositories.db_ticker_repository.get_session"
+    )
+    def test_get_or_fail_by_id(self, get_session: Mock) -> None:
+        ticker_table_model = TickerTableModel(id=1, ticker="BTCUSDT", symbol_id=1, exchange_id=1)
+        query_result = Mock(spec=Result)
+        query_result.scalar_one_or_none.return_value = ticker_table_model
+        session = Mock(spec=Session)
+        get_session.return_value.__enter__.return_value = session
+        session.execute.return_value = query_result
+        ticker = Ticker(id=1, ticker="BTCUSDT", symbol_id=1, exchange_id=1)
+        self.db_ticker_translator.translate_to_domain_model.return_value = ticker
+
+        result = self.repository.get_or_fail_by_id(1)
+
+        self.assertEqual(ticker, result)
+        self.db_ticker_translator.translate_to_domain_model.assert_called_once_with(
+            ticker_table_model
+        )
+        query_result.scalar_one_or_none.assert_called_once()
+        session.execute.assert_called_once()
+
+    @patch(
+        "app.infrastructure.crypto.database.repositories.db_ticker_repository.get_session"
+    )
+    def test_get_or_fail_by_id_not_found(self, get_session: Mock) -> None:
+        query_result = Mock(spec=Result)
+        query_result.scalar_one_or_none.return_value = None
+        session = Mock(spec=Session)
+        get_session.return_value.__enter__.return_value = session
+        session.execute.return_value = query_result
+
+        with self.assertRaisesRegex(
+                TickerNotFoundException, "Ticker with id '1000' not found"
+        ):
+            self.repository.get_or_fail_by_id(1000)
 
         self.db_ticker_translator.translate_to_domain_model.assert_not_called()
         query_result.scalar_one_or_none.assert_called_once()
