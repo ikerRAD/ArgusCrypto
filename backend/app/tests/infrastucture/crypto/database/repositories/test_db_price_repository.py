@@ -99,17 +99,17 @@ class TestDbPriceRepository(TestCase):
         session.execute.assert_called_once()
         self.db_price_translator.bulk_translate_to_domain_model.assert_not_called()
 
-
-
     @patch(
         "app.infrastructure.crypto.database.repositories.db_price_repository.get_session"
     )
-    def test_get_all_or_fail_by_ticker_id_ignore_ticker(self, get_session: Mock) -> None:
+    def test_get_all_or_fail_by_ticker_id_ignore_ticker(
+        self, get_session: Mock
+    ) -> None:
         session = Mock(spec=Session)
         get_session.return_value.__enter__.return_value = session
         query_result = Mock(spec=Result)
         query_result.scalars.return_value.all.return_value = self.price_table_models
-        session.execute.return_value =query_result
+        session.execute.return_value = query_result
         self.db_price_translator.bulk_translate_to_domain_model.return_value = (
             self.domain_prices
         )

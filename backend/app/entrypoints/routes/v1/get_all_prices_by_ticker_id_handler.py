@@ -21,7 +21,11 @@ from app.settings import PRICE_WEBSOCKET_INTERVAL
 
 
 class GetAllPricesByTickerIdHandler(RouteHandler):
-    def __init__(self, query: None | GetAllPricesByTickerIdQuery = None, websocket_interval: None | float = None):
+    def __init__(
+        self,
+        query: None | GetAllPricesByTickerIdQuery = None,
+        websocket_interval: None | float = None,
+    ):
         self.__query = query or GetAllPricesByTickerIdQueryFactory.create()
         self.__websocket_interval = websocket_interval or PRICE_WEBSOCKET_INTERVAL
 
@@ -52,10 +56,14 @@ class GetAllPricesByTickerIdHandler(RouteHandler):
             )
             raise HTTPException(status_code=500, detail="An unexpected error happened.")
 
-    async def handle_websocket(self, websocket: WebSocket, ticker_id: int, last_minutes: int):
+    async def handle_websocket(
+        self, websocket: WebSocket, ticker_id: int, last_minutes: int
+    ):
         try:
             instant = datetime.now()
-            response = self.__query.execute(ticker_id, instant - timedelta(minutes=last_minutes), instant, False)
+            response = self.__query.execute(
+                ticker_id, instant - timedelta(minutes=last_minutes), instant, False
+            )
 
             await self.__flush_prices(websocket, response.prices)
 
@@ -63,7 +71,9 @@ class GetAllPricesByTickerIdHandler(RouteHandler):
             while True:
                 next_instant = datetime.now()
 
-                response = self.__query.execute(ticker_id, previous_instant, next_instant, False, False)
+                response = self.__query.execute(
+                    ticker_id, previous_instant, next_instant, False, False
+                )
                 await self.__flush_prices(websocket, response.prices)
 
                 previous_instant = next_instant
@@ -82,9 +92,11 @@ class GetAllPricesByTickerIdHandler(RouteHandler):
     async def __flush_prices(self, websocket: WebSocket, prices: list[Price]) -> None:
         for price in prices:
             price_schema = PriceSchema.from_domain(price)
-            await websocket.send_json({
-                "id": price_schema.id,
-                "ticker_id": price_schema.ticker_id,
-                "price": price_schema.price,
-                "timestamp": price_schema.timestamp.isoformat(),
-            })
+            await websocket.send_json(
+                {
+                    "id": price_schema.id,
+                    "ticker_id": price_schema.ticker_id,
+                    "price": price_schema.price,
+                    "timestamp": price_schema.timestamp.isoformat(),
+                }
+            )

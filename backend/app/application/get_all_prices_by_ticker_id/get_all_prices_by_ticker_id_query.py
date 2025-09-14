@@ -12,7 +12,12 @@ class GetAllPricesByTickerIdQuery(Instruction):
         self.__price_repository = price_repository
 
     def execute(
-        self, ticker_id: int, start_date: None | datetime, end_date: None | datetime, include_end = True, check_ticker = True
+        self,
+        ticker_id: int,
+        start_date: None | datetime,
+        end_date: None | datetime,
+        include_end=True,
+        check_ticker=True,
     ) -> GetAllPricesByTickerIdQueryResponse:
         return GetAllPricesByTickerIdQueryResponse(
             prices=self.__price_repository.get_all_or_fail_by_ticker_id(

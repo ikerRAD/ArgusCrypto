@@ -12,6 +12,7 @@ services:
     profiles:
       - database
       - backend
+      - app
       - mq
       - all
 
@@ -31,6 +32,21 @@ services:
       - ./backend:/app
     profiles:
       - backend
+      - app
+      - all
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - "${DASHBOARD_PORT:-8501}:${DASHBOARD_PORT:-8501}"
+    profiles:
+      - app
       - all
 
   rabbitmq:

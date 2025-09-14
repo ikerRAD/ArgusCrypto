@@ -134,20 +134,22 @@ class TestGetAllPricesByTickerIdHandler(TestCase):
         try:
             await self.handler.handle_websocket(websocket, 1, 100)
         except WebSocketDisconnect:
-
-            self.assertEqual(3, self.get_all_prices_by_ticker_id_query.execute.call_count)
+            self.assertEqual(
+                3, self.get_all_prices_by_ticker_id_query.execute.call_count
+            )
             logger.info.assert_not_called()
             logger.error.assert_not_called()
 
     @patch("app.entrypoints.routes.v1.get_all_prices_by_ticker_id_handler.logger")
     async def test_handle_websocket_ticker_not_found(self, logger: Mock) -> None:
-        self.get_all_prices_by_ticker_id_query.execute.side_effect = TickerNotFoundException(1)
+        self.get_all_prices_by_ticker_id_query.execute.side_effect = (
+            TickerNotFoundException(1)
+        )
         websocket = Mock(spec=WebSocket)
 
         try:
             await self.handler.handle_websocket(websocket, 1, 100)
         except TickerNotFoundException:
-
             self.get_all_prices_by_ticker_id_query.execute.assert_called_once()
             logger.info.assert_not_called()
             logger.error.assert_called_once_with("Ticker with id '1' not found")
@@ -161,8 +163,11 @@ class TestGetAllPricesByTickerIdHandler(TestCase):
         try:
             await self.handler.handle_websocket(websocket, 1, 100)
         except Exception as e:
-
             self.get_all_prices_by_ticker_id_query.execute.assert_called_once()
             logger.info.assert_not_called()
-            logger.error.assert_called_once_with(f"An unexpected error happened in price websocket: {e}")
-            websocket.send_json.assert_called_once_with({"error": "An unexpected error happened"})
+            logger.error.assert_called_once_with(
+                f"An unexpected error happened in price websocket: {e}"
+            )
+            websocket.send_json.assert_called_once_with(
+                {"error": "An unexpected error happened"}
+            )

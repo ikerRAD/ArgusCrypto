@@ -19,4 +19,4 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://database:database@db:5432/database"
 )
 
-PRICE_WEBSOCKET_INTERVAL=float(os.getenv("PRICE_WEBSOCKET_INTERVAL", 0.25))
+PRICE_WEBSOCKET_INTERVAL = float(os.getenv("PRICE_WEBSOCKET_INTERVAL", 0.25))
