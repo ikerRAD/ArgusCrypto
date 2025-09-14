@@ -1,3 +1,3 @@
 class ExchangeNotFoundException(Exception):
-    def __init__(self, exchange_name: str):
-        super().__init__(f"exchange with name '{exchange_name}' not found'")
+    def __init__(self, attr_name, attr_value: str | int):
+        super().__init__(f"exchange with {attr_name} '{attr_value}' not found'")

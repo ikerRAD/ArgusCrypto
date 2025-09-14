@@ -27,6 +27,4 @@ class GetAllExchangesHandler(RouteHandler):
             logger.error(
                 f"An unexpected error happened while querying all exchanges: {e}"
             )
-            raise HTTPException(
-                status_code=500, detail="An unexpected error happened."
-            )
+            raise HTTPException(status_code=500, detail="An unexpected error happened.")

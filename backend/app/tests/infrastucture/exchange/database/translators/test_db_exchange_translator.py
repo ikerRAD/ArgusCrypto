@@ -51,11 +51,15 @@ class TestDbExchangeTranslator(TestCase):
             ticker_table_models
         )
 
-
-
     def test_bulk_translate_to_domain_model(self) -> None:
-        exchange_table_models = [ExchangeTableModel(name="Kraken"),ExchangeTableModel(id=1, name="Binance")]
-        expected_domain_exchanges = [Exchange(name="Kraken"), Exchange(id=1, name="Binance")]
+        exchange_table_models = [
+            ExchangeTableModel(name="Kraken"),
+            ExchangeTableModel(id=1, name="Binance"),
+        ]
+        expected_domain_exchanges = [
+            Exchange(name="Kraken"),
+            Exchange(id=1, name="Binance"),
+        ]
 
         result = self.translator.bulk_translate_to_domain_model(exchange_table_models)
 

@@ -98,8 +98,6 @@ class TestDbExchangeRepository(TestCase):
         query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()
 
-
-
     @patch(
         "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
     )
@@ -109,12 +107,58 @@ class TestDbExchangeRepository(TestCase):
         session = Mock(spec=Session)
         session.execute.return_value = query_result
         get_session.return_value.__enter__.return_value = session
-        self.db_exchange_translator.bulk_translate_to_domain_model.return_value = [self.exchange]
+        self.db_exchange_translator.bulk_translate_to_domain_model.return_value = [
+            self.exchange
+        ]
 
         result = self.repository.get_all()
 
         self.assertEqual(result, [self.exchange])
-        self.db_exchange_translator.bulk_translate_to_domain_model.assert_called_once_with([self.exchange_table_model])
+        self.db_exchange_translator.bulk_translate_to_domain_model.assert_called_once_with(
+            [self.exchange_table_model]
+        )
         query_result.scalars.assert_called_once()
         query_result.scalars.return_value.all.assert_called_once()
+        session.execute.assert_called_once()
+
+    @patch(
+        "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
+    )
+    def test_get_or_fail_by_id(self, get_session: Mock) -> None:
+        query_result = Mock(spec=Result)
+        query_result.scalar_one_or_none.return_value = self.exchange_table_model
+        session = Mock(spec=Session)
+        session.execute.return_value = query_result
+        get_session.return_value.__enter__.return_value = session
+        self.db_exchange_translator.translate_to_domain_model.return_value = (
+            self.exchange
+        )
+
+        result = self.repository.get_or_fail_by_id(1)
+
+        self.assertEqual(result, self.exchange)
+        self.assertEqual(result.tickers, None)
+        self.db_exchange_translator.translate_to_domain_model.assert_called_once_with(
+            self.exchange_table_model
+        )
+        query_result.scalar_one_or_none.assert_called_once()
+        session.execute.assert_called_once()
+
+    @patch(
+        "app.infrastructure.exchange.database.repositories.db_exchange_repository.get_session"
+    )
+    def test_get_or_fail_by_id_not_found(self, get_session: Mock) -> None:
+        query_result = Mock(spec=Result)
+        query_result.scalar_one_or_none.return_value = None
+        session = Mock(spec=Session)
+        session.execute.return_value = query_result
+        get_session.return_value.__enter__.return_value = session
+
+        with self.assertRaisesRegex(
+            ExchangeNotFoundException, "exchange with id '1000' not found'"
+        ):
+            self.repository.get_or_fail_by_id(1000)
+
+        self.db_exchange_translator.translate_to_domain_model.assert_not_called()
+        query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()

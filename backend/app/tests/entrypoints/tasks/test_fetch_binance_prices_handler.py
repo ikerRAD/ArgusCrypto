@@ -32,7 +32,7 @@ class TestFetchBinancePricesHandler(TestCase):
 
     @patch("app.entrypoints.tasks.fetch_binance_prices_handler.task_logger")
     def test_handle_binance_not_found(self, logger: Mock) -> None:
-        exchange_not_found_exception = ExchangeNotFoundException("Binance")
+        exchange_not_found_exception = ExchangeNotFoundException("name", "Binance")
         self.update_prices_from_remote_command.execute.side_effect = (
             exchange_not_found_exception
         )

@@ -81,5 +81,10 @@ def get_all_exchanges():
     },
     tags=["Exchanges"],
 )
-def get_exchange_by_id(schema_id: int):
-    pass
+def get_exchange_by_id(exchange_id: int):
+    from app.entrypoints.routes.v1.get_exchange_by_id_handler import (
+        GetExchangeByIdHandler,
+    )
+
+    handler = GetExchangeByIdHandler()
+    return handler.handle(exchange_id)

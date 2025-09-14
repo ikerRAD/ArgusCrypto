@@ -11,3 +11,7 @@ class ExchangeRepository(ABC):
     @abstractmethod
     def get_all(self) -> list[Exchange]:
         pass
+
+    @abstractmethod
+    def get_or_fail_by_id(self, exchange_id: int) -> Exchange:
+        pass

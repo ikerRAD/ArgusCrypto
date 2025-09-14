@@ -3,8 +3,12 @@ from unittest.mock import Mock, patch
 
 from fastapi import HTTPException
 
-from app.application.get_all_exchanges.get_all_exchanges_query import GetAllExchangesQuery
-from app.application.get_all_exchanges.get_all_exchanges_query_response import GetAllExchangesQueryResponse
+from app.application.get_all_exchanges.get_all_exchanges_query import (
+    GetAllExchangesQuery,
+)
+from app.application.get_all_exchanges.get_all_exchanges_query_response import (
+    GetAllExchangesQueryResponse,
+)
 from app.domain.exchange.models.exchange import Exchange
 from app.entrypoints.routes.v1.get_all_exchanges_handler import GetAllExchangesHandler
 from app.interfaces.api.v1.schemas.exchange_schema import ExchangeSchema
@@ -18,12 +22,17 @@ class TestGetAllExchangesHandler(TestCase):
 
     @patch("app.entrypoints.routes.v1.get_all_exchanges_handler.logger")
     def test_handle(self, logger: Mock) -> None:
-        exchanges = [Exchange(id=1, name="Binance"),Exchange(id=2, name="Kraken")]
-        self.get_all_exchanges_query.execute.return_value = GetAllExchangesQueryResponse(exchanges=exchanges)
+        exchanges = [Exchange(id=1, name="Binance"), Exchange(id=2, name="Kraken")]
+        self.get_all_exchanges_query.execute.return_value = (
+            GetAllExchangesQueryResponse(exchanges=exchanges)
+        )
 
         result = self.handler.handle()
 
-        self.assertEqual(result, [ExchangeSchema(id=1, name="Binance"), ExchangeSchema(id=2, name="Kraken")])
+        self.assertEqual(
+            result,
+            [ExchangeSchema(id=1, name="Binance"), ExchangeSchema(id=2, name="Kraken")],
+        )
         self.get_all_exchanges_query.execute.assert_called_once()
         logger.info.assert_called_once_with("Getting all exchanges from database")
         logger.error.assert_not_called()
