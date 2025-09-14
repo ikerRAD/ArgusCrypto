@@ -108,3 +108,71 @@ class TestRoutes(TestCase):
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.get_symbol_by_id.get_symbol_by_id_query_factory.GetSymbolByIdQueryFactory.create"
+    )
+    def test_get_symbol_by_id_fail(self, get_symbol_by_id_query_create: Mock) -> None:
+        get_symbol_by_id_query_create.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.get("/v1/symbols/11")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_post_symbol(self) -> None:
+        expected_status_code = 201
+        expected_content = {"id": 4, "name": "Dogecoin", "symbol": "DOGE"}
+
+        response = self.client.post(
+            "/v1/symbols", content='{"name": "Dogecoin", "symbol": "DOGE"}'
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_post_symbol_conflict(self) -> None:
+        expected_status_code = 409
+        expected_content = {"detail": "Symbol 'ETH' already exists"}
+
+        response = self.client.post(
+            "/v1/symbols", content='{"name": "Ethereum", "symbol": "ETH"}'
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_post_symbol_validation_error(self) -> None:
+        expected_status_code = 422
+        expected_content = {
+            "detail": [
+                {
+                    "input": {"symbol": "ETH"},
+                    "loc": ["body", "name"],
+                    "msg": "Field required",
+                    "type": "missing",
+                }
+            ]
+        }
+
+        response = self.client.post("/v1/symbols", content='{"symbol": "ETH"}')
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    @patch(
+        "app.dependency_injection_factories.application.create_symbol.create_symbol_command_factory.CreateSymbolCommandFactory.create"
+    )
+    def test_create_symbol_fail(self, create_symbol_command_create: Mock) -> None:
+        create_symbol_command_create.return_value.execute.side_effect = Exception()
+        expected_status_code = 500
+        expected_content = {"detail": "An unexpected error happened."}
+
+        response = self.client.post(
+            "/v1/symbols", content='{"name": "Shiva Inu", "symbol": "SHIV"}'
+        )
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())

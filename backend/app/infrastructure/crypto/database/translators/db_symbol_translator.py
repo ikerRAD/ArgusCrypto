@@ -17,3 +17,13 @@ class DbSymbolTranslator:
             name=symbol_table_model.name,
             symbol=symbol_table_model.symbol,
         )
+
+    def translate_to_table_model(self, domain_symbol: Symbol) -> SymbolTableModel:
+        symbol_table_model = SymbolTableModel(
+            name=domain_symbol.name, symbol=domain_symbol.symbol
+        )
+
+        if domain_symbol.id is not None:
+            symbol_table_model.id = domain_symbol.id
+
+        return symbol_table_model

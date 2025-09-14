@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from app.interfaces.api.v1.schemas.symbol_create_schema import SymbolCreateSchema
 from app.interfaces.api.v1.schemas.symbol_schema import SymbolSchema
@@ -33,6 +33,23 @@ def get_symbol_by_id(symbol_id: int):
     return handler.handle(symbol_id)
 
 
-@router_v1.post("/symbols", response_model=SymbolSchema)
+@router_v1.post(
+    "/symbols",
+    status_code=status.HTTP_201_CREATED,
+    response_model=SymbolSchema,
+    responses={
+        409: {
+            "description": "Symbol already exists",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Symbol 'SYMBOL' already exists"}
+                }
+            },
+        }
+    },
+)
 def post_symbol(symbol: SymbolCreateSchema):
-    pass
+    from app.entrypoints.routes.v1.post_symbol_handler import PostSymbolHandler
+
+    handler = PostSymbolHandler()
+    return handler.handle(symbol)

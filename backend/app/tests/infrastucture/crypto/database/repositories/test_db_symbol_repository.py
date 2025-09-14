@@ -2,8 +2,12 @@ from unittest import TestCase
 from unittest.mock import Mock, patch
 
 from sqlalchemy import Result
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from app.domain.crypto.exceptions.symbol_already_exists_exception import (
+    SymbolAlreadyExistsException,
+)
 from app.domain.crypto.exceptions.symbol_not_found_exception import (
     SymbolNotFoundException,
 )
@@ -94,3 +98,51 @@ class TestDbSymbolRepository(TestCase):
         self.db_symbol_translator.translate_to_domain_model.assert_not_called()
         query_result.scalar_one_or_none.assert_called_once()
         session.execute.assert_called_once()
+
+    @patch(
+        "app.infrastructure.crypto.database.repositories.db_symbol_repository.get_session"
+    )
+    def test_insert(self, get_session: Mock) -> None:
+        session = Mock(spec=Session)
+        get_session.return_value.__enter__.return_value = session
+        symbol_table_model = SymbolTableModel(name="Bitcoin", symbol="BTC")
+        self.db_symbol_translator.translate_to_table_model.return_value = (
+            symbol_table_model
+        )
+        symbol = Symbol(name="Bitcoin", symbol="BTC")
+
+        self.repository.insert(symbol)
+
+        self.db_symbol_translator.translate_to_table_model.assert_called_once_with(
+            symbol
+        )
+        self.db_symbol_translator.translate_to_domain_model.assert_called_once_with(
+            symbol_table_model
+        )
+        session.add.assert_called_once_with(symbol_table_model)
+
+    @patch(
+        "app.infrastructure.crypto.database.repositories.db_symbol_repository.get_session"
+    )
+    def test_insert_already_exists(self, get_session: Mock) -> None:
+        session = Mock(spec=Session)
+        get_session.return_value.__enter__.return_value = session
+        symbol_table_model = SymbolTableModel(name="Bitcoin", symbol="BTC")
+        self.db_symbol_translator.translate_to_table_model.return_value = (
+            symbol_table_model
+        )
+        symbol = Symbol(name="Bitcoin", symbol="BTC")
+        session.add.side_effect = IntegrityError(
+            "violated unique constraint", None, Exception()
+        )
+
+        with self.assertRaisesRegex(
+            SymbolAlreadyExistsException, "Symbol 'BTC' already exists"
+        ):
+            self.repository.insert(symbol)
+
+        self.db_symbol_translator.translate_to_table_model.assert_called_once_with(
+            symbol
+        )
+        self.db_symbol_translator.translate_to_domain_model.assert_not_called()
+        session.add.assert_called_once_with(symbol_table_model)

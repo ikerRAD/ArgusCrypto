@@ -33,3 +33,25 @@ class TestDbSymbolTranslator(TestCase):
                 Symbol(id=2, name="Ethereum", symbol="ETH"),
             ],
         )
+
+    def test_translate_to_table_model(self) -> None:
+        expected_table_model = SymbolTableModel(id=1, name="Bitcoin", symbol="BTC")
+
+        result = self.translator.translate_to_table_model(
+            Symbol(id=1, name="Bitcoin", symbol="BTC")
+        )
+
+        self.assertEqual(expected_table_model.id, result.id)
+        self.assertEqual(expected_table_model.name, result.name)
+        self.assertEqual(expected_table_model.symbol, result.symbol)
+
+    def test_translate_to_table_model_no_id(self) -> None:
+        expected_table_model = SymbolTableModel(name="Bitcoin", symbol="BTC")
+
+        result = self.translator.translate_to_table_model(
+            Symbol(name="Bitcoin", symbol="BTC")
+        )
+
+        self.assertIsNone(result.id)
+        self.assertEqual(expected_table_model.name, result.name)
+        self.assertEqual(expected_table_model.symbol, result.symbol)

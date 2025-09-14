@@ -1,6 +1,10 @@
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from app.db import get_session
+from app.domain.crypto.exceptions.symbol_already_exists_exception import (
+    SymbolAlreadyExistsException,
+)
 from app.domain.crypto.exceptions.symbol_not_found_exception import (
     SymbolNotFoundException,
 )
@@ -38,3 +42,19 @@ class DbSymbolRepository(SymbolRepository):
                 raise SymbolNotFoundException(symbol_id)
 
         return self.__db_symbol_translator.translate_to_domain_model(symbol_table_model)
+
+    def insert(self, symbol: Symbol) -> Symbol:
+        try:
+            with get_session() as session:
+                symbol_table_model = (
+                    self.__db_symbol_translator.translate_to_table_model(symbol)
+                )
+
+                session.add(symbol_table_model)
+
+            return self.__db_symbol_translator.translate_to_domain_model(
+                symbol_table_model
+            )
+
+        except IntegrityError:
+            raise SymbolAlreadyExistsException(symbol.symbol)
