@@ -14,9 +14,23 @@ def get_all_symbols():
     return handler.handle()
 
 
-@router_v1.get("/symbols/{symbol_id}", response_model=SymbolSchema)
+@router_v1.get(
+    "/symbols/{symbol_id}",
+    response_model=SymbolSchema,
+    responses={
+        404: {
+            "description": "Symbol not found",
+            "content": {
+                "application/json": {"example": {"detail": "Symbol not found"}}
+            },
+        }
+    },
+)
 def get_symbol_by_id(symbol_id: int):
-    pass
+    from app.entrypoints.routes.v1.get_symbol_by_id_handler import GetSymbolByIdHandler
+
+    handler = GetSymbolByIdHandler()
+    return handler.handle(symbol_id)
 
 
 @router_v1.post("/symbols", response_model=SymbolSchema)

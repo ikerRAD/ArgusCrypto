@@ -72,3 +72,39 @@ class TestRoutes(TestCase):
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())
+
+    def test_get_symbol_by_id(self) -> None:
+        expected_status_code = 200
+        expected_content = {"id": 1, "name": "Bitcoin", "symbol": "BTC"}
+
+        response = self.client.get("/v1/symbols/1")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_symbol_by_id_invalid_id(self) -> None:
+        expected_status_code = 422
+        expected_content = {
+            "detail": [
+                {
+                    "type": "int_parsing",
+                    "loc": ["path", "symbol_id"],
+                    "msg": "Input should be a valid integer, unable to parse string as an integer",
+                    "input": "1aq",
+                }
+            ]
+        }
+
+        response = self.client.get("/v1/symbols/1aq")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())
+
+    def test_get_symbol_by_id_not_found(self) -> None:
+        expected_status_code = 404
+        expected_content = {"detail": "Symbol not found"}
+
+        response = self.client.get("/v1/symbols/8000")
+
+        self.assertEqual(expected_status_code, response.status_code)
+        self.assertEqual(expected_content, response.json())

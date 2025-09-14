@@ -7,3 +7,7 @@ class SymbolRepository(ABC):
     @abstractmethod
     def get_all(self) -> list[Symbol]:
         pass
+
+    @abstractmethod
+    def get_or_fail_by_id(self, symbol_id: int) -> Symbol:
+        pass
