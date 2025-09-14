@@ -1,13 +1,14 @@
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, ForeignKey, Float, DateTime, Index, func
+from sqlalchemy import Column, Integer, ForeignKey, Float, DateTime, Index
 from sqlalchemy.orm import relationship
 
-from app.db import BaseTableModel
+from app.db import Base
 
 
-class PriceTableModel(BaseTableModel):
+class PriceTableModel(Base):
     __tablename__ = "prices"
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
     ticker_id = Column(
         Integer, ForeignKey("tickers.id", ondelete="cascade"), nullable=False
     )

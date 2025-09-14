@@ -11,14 +11,13 @@ from app.infrastructure.exchange.database.table_models import ExchangeTableModel
 from app.infrastructure.exchange.database.translators.db_exchange_translator import (
     DbExchangeTranslator,
 )
-from app.tasks import logger
 
 
 class DbExchangeRepository(ExchangeRepository):
     def __init__(self, db_exchange_translator: DbExchangeTranslator):
         self.__db_exchange_translator = db_exchange_translator
 
-    def find_exchange(self, exchange_name: str, fetch_tickers: bool) -> Exchange:
+    def get_or_fail_by_name(self, exchange_name: str, fetch_tickers: bool) -> Exchange:
         with get_session() as session:
             statement = select(ExchangeTableModel).where(
                 ExchangeTableModel.name == exchange_name

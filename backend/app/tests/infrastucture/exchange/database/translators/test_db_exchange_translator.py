@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
 
 from app.domain.crypto.models.ticker import Ticker
 from app.domain.exchange.models.exchange import Exchange

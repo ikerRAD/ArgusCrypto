@@ -7,5 +7,5 @@ class Response:
 
 class Instruction(ABC):
     @abstractmethod
-    def execute(self) -> Response | None:
+    def execute(self, *args) -> Response | None:
         pass

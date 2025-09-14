@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 
+from pydantic import BaseModel
+
 
 class RouteHandler(ABC):
     @abstractmethod
-    def handle(self) -> dict:
+    def handle(self, *args) -> BaseModel | list[BaseModel]:
         pass

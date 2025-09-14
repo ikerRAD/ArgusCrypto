@@ -10,7 +10,7 @@ from app.domain.exchange.exceptions.exchange_not_found_exception import (
     ExchangeNotFoundException,
 )
 from app.entrypoints.tasks import TaskHandler
-from app.tasks import logger
+from app.tasks import task_logger
 
 
 class FetchKrakenPricesHandler(TaskHandler):
@@ -21,13 +21,13 @@ class FetchKrakenPricesHandler(TaskHandler):
 
     def handle(self) -> None:
         try:
-            logger.info("Fetching Kraken prices...")
+            task_logger.info("Fetching Kraken prices...")
             self.__command.execute()
         except ExchangeNotFoundException as e:
-            logger.error(f"Kraken is not a registered exchange: {e}")
+            task_logger.error(f"Kraken is not a registered exchange: {e}")
         except ConnectTimeout:
-            logger.error("The connection to Kraken API has timed out")
+            task_logger.error("The connection to Kraken API has timed out")
         except Exception as e:
-            logger.error(
+            task_logger.error(
                 f"An unexpected error happened while fetching Kraken prices: {e}"
             )
