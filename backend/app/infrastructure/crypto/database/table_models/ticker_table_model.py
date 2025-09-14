@@ -1,12 +1,13 @@
 from sqlalchemy import Column, Integer, ForeignKey, UniqueConstraint, String
 from sqlalchemy.orm import relationship
 
-from app.db import BaseTableModel
+from app.db import Base
 
 
-class TickerTableModel(BaseTableModel):
+class TickerTableModel(Base):
     __tablename__ = "tickers"
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
     symbol_id = Column(
         Integer, ForeignKey("symbols.id", ondelete="cascade"), nullable=False
     )
