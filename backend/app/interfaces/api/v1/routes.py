@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, WebSocket
+from starlette.websockets import WebSocketDisconnect
 
 from app.interfaces.api.v1.schemas.exchange_schema import ExchangeSchema
 from app.interfaces.api.v1.schemas.price_schema import PriceSchema
@@ -8,6 +9,7 @@ from app.interfaces.api.v1.schemas.symbol_create_schema import SymbolCreateSchem
 from app.interfaces.api.v1.schemas.symbol_schema import SymbolSchema
 from app.interfaces.api.v1.schemas.ticker_create_schema import TickerCreateSchema
 from app.interfaces.api.v1.schemas.ticker_schema import TickerSchema
+from app.main import logger
 
 router_v1 = APIRouter()
 
@@ -200,3 +202,26 @@ def get_all_prices_by_ticker_id(
 
     handler = GetAllPricesByTickerIdHandler()
     return handler.handle(ticker_id, start_date, end_date)
+
+
+@router_v1.websocket(
+    "/tickers/{ticker_id}/prices/ws",
+)
+async def get_all_prices_by_ticker_id_ws(
+    websocket: WebSocket, ticker_id: int, last_minutes: int = 10
+):
+    from app.entrypoints.routes.v1.get_all_prices_by_ticker_id_handler import (
+        GetAllPricesByTickerIdHandler,
+    )
+
+    handler = GetAllPricesByTickerIdHandler()
+
+    try:
+        await websocket.accept()
+        await handler.handle_websocket(websocket, ticker_id, last_minutes)
+
+    except WebSocketDisconnect:
+        logger.info(f"Websocket for ticker_id {ticker_id} disconnected")
+    except Exception as e:
+        logger.error(f"Websocket for ticker_id {ticker_id} failed: {e}")
+        await websocket.close()

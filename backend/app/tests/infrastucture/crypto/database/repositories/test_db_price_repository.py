@@ -14,7 +14,6 @@ from app.infrastructure.crypto.database.repositories.db_price_repository import 
 )
 from app.infrastructure.crypto.database.table_models import (
     PriceTableModel,
-    TickerTableModel,
 )
 from app.infrastructure.crypto.database.translators.db_price_translator import (
     DbPriceTranslator,
@@ -99,3 +98,28 @@ class TestDbPriceRepository(TestCase):
 
         session.execute.assert_called_once()
         self.db_price_translator.bulk_translate_to_domain_model.assert_not_called()
+
+
+
+    @patch(
+        "app.infrastructure.crypto.database.repositories.db_price_repository.get_session"
+    )
+    def test_get_all_or_fail_by_ticker_id_ignore_ticker(self, get_session: Mock) -> None:
+        session = Mock(spec=Session)
+        get_session.return_value.__enter__.return_value = session
+        query_result = Mock(spec=Result)
+        query_result.scalars.return_value.all.return_value = self.price_table_models
+        session.execute.return_value =query_result
+        self.db_price_translator.bulk_translate_to_domain_model.return_value = (
+            self.domain_prices
+        )
+
+        result = self.repository.get_all_or_fail_by_ticker_id(
+            1000, self.start_date, self.start_date, check_ticker=False
+        )
+
+        self.assertEqual(self.domain_prices, result)
+        session.execute.assert_called_once()
+        self.db_price_translator.bulk_translate_to_domain_model.assert_called_once_with(
+            self.price_table_models
+        )

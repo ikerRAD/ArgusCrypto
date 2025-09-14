@@ -28,14 +28,15 @@ class DbPriceRepository(PriceRepository):
             )
 
     def get_all_or_fail_by_ticker_id(
-        self, ticker_id: int, start_date: None | datetime, end_date: None | datetime
+        self, ticker_id: int, start_date: None | datetime, end_date: None | datetime, include_end = True, check_ticker = True
     ) -> list[Price]:
         with get_session() as session:
-            ticker_check_query_result = session.execute(
-                select(TickerTableModel).where(TickerTableModel.id == ticker_id)
-            )
-            if ticker_check_query_result.scalar_one_or_none() is None:
-                raise TickerNotFoundException(ticker_id)
+            if check_ticker:
+                ticker_check_query_result = session.execute(
+                    select(TickerTableModel).where(TickerTableModel.id == ticker_id)
+                )
+                if ticker_check_query_result.scalar_one_or_none() is None:
+                    raise TickerNotFoundException(ticker_id)
 
             statement = select(PriceTableModel).where(
                 PriceTableModel.ticker_id == ticker_id
@@ -45,7 +46,10 @@ class DbPriceRepository(PriceRepository):
                 statement = statement.where(PriceTableModel.timestamp >= start_date)
 
             if end_date is not None:
-                statement = statement.where(PriceTableModel.timestamp <= end_date)
+                if include_end:
+                    statement = statement.where(PriceTableModel.timestamp <= end_date)
+                else:
+                    statement = statement.where(PriceTableModel.timestamp < end_date)
 
             query_result = session.execute(statement)
 

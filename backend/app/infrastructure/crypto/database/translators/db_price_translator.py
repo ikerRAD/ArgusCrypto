@@ -1,4 +1,3 @@
-from app.domain.crypto.models import price
 from app.domain.crypto.models.price import Price
 from app.infrastructure.crypto.database.table_models import PriceTableModel
 
