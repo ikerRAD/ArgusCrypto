@@ -71,7 +71,7 @@ services:
       - rabbitmq
     env_file:
       - .env
-    command: celery -A app.tasks beat --loglevel=error
+    command: celery -A app.tasks beat --loglevel=info
     entrypoint: []
     profiles:
       - mq
@@ -85,7 +85,7 @@ services:
       - rabbitmq
     env_file:
       - .env
-    command: celery -A app.tasks worker --loglevel=error
+    command: celery -A app.tasks worker --loglevel=info
     entrypoint: []
     profiles:
       - mq
