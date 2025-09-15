@@ -6,7 +6,6 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
 from starlette.testclient import TestClient
-from fastapi import WebSocket
 
 from app.db import Base
 from app.infrastructure.crypto.database.table_models import (

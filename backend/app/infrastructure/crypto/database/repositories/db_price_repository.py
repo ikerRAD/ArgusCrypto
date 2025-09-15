@@ -56,7 +56,9 @@ class DbPriceRepository(PriceRepository):
                 else:
                     statement = statement.where(PriceTableModel.timestamp < end_date)
 
-            query_result = session.execute(statement)
+            query_result = session.execute(
+                statement.order_by(PriceTableModel.timestamp.asc())
+            )
 
             price_table_models = query_result.scalars().all()
 

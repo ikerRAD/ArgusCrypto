@@ -45,6 +45,8 @@ services:
       - .env
     ports:
       - "${DASHBOARD_PORT:-8501}:${DASHBOARD_PORT:-8501}"
+    volumes:
+      - ./dashboard:/app
     profiles:
       - app
       - all
@@ -73,7 +75,7 @@ services:
       - rabbitmq
     env_file:
       - .env
-    command: celery -A app.tasks beat --loglevel=info
+    command: celery -A app.tasks beat --loglevel=error
     entrypoint: []
     profiles:
       - mq
@@ -87,7 +89,7 @@ services:
       - rabbitmq
     env_file:
       - .env
-    command: celery -A app.tasks worker --loglevel=info
+    command: celery -A app.tasks worker --loglevel=error
     entrypoint: []
     profiles:
       - mq
