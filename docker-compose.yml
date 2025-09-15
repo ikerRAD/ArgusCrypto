@@ -28,8 +28,6 @@ services:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-database}:${POSTGRES_PASSWORD:-database}@db:5432/${POSTGRES_DB:-database}"
     ports:
       - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
-    volumes:
-      - ./backend:/app
     profiles:
       - backend
       - app
@@ -45,8 +43,6 @@ services:
       - .env
     ports:
       - "${DASHBOARD_PORT:-8501}:${DASHBOARD_PORT:-8501}"
-    volumes:
-      - ./dashboard:/app
     profiles:
       - app
       - all
