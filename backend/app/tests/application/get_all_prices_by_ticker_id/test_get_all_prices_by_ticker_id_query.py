@@ -28,5 +28,5 @@ class TestGetAllPricesByTickerIdQuery(TestCase):
 
         self.assertEqual(GetAllPricesByTickerIdQueryResponse(prices=[price]), response)
         self.price_repository.get_all_or_fail_by_ticker_id.assert_called_with(
-            1, start_date, end_date
+            1, start_date, end_date, True, True
         )

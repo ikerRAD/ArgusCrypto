@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest import TestCase
 from unittest.mock import patch, Mock
 
@@ -735,3 +735,102 @@ class TestRoutes(TestCase):
 
         self.assertEqual(expected_status_code, response.status_code)
         self.assertEqual(expected_content, response.json())
+
+    def test_get_all_prices_by_ticker_id_ws(self):
+        with self.TestingSessionLocal() as session:
+            session.add_all(
+                [
+                    PriceTableModel(
+                        id=10000000,
+                        ticker_id=1,
+                        price=10.001,
+                        timestamp=datetime.now() - timedelta(minutes=20),
+                    ),
+                    PriceTableModel(
+                        id=10,
+                        ticker_id=1,
+                        price=10.001,
+                        timestamp=datetime.now() - timedelta(minutes=9),
+                    ),
+                    PriceTableModel(
+                        id=11,
+                        ticker_id=1,
+                        price=10.002,
+                        timestamp=datetime.now() - timedelta(minutes=8),
+                    ),
+                    PriceTableModel(
+                        id=12,
+                        ticker_id=1,
+                        price=10.003,
+                        timestamp=datetime.now() - timedelta(minutes=7),
+                    ),
+                    PriceTableModel(
+                        id=13,
+                        ticker_id=1,
+                        price=10.004,
+                        timestamp=datetime.now() - timedelta(minutes=6),
+                    ),
+                    PriceTableModel(
+                        id=14,
+                        ticker_id=1,
+                        price=10.003,
+                        timestamp=datetime.now() - timedelta(minutes=5),
+                    ),
+                    PriceTableModel(
+                        id=15,
+                        ticker_id=1,
+                        price=10.002,
+                        timestamp=datetime.now() - timedelta(minutes=4),
+                    ),
+                    PriceTableModel(
+                        id=16,
+                        ticker_id=1,
+                        price=10.001,
+                        timestamp=datetime.now() - timedelta(minutes=3),
+                    ),
+                    PriceTableModel(
+                        id=17,
+                        ticker_id=1,
+                        price=10.0009,
+                        timestamp=datetime.now() - timedelta(minutes=2),
+                    ),
+                    PriceTableModel(
+                        id=18,
+                        ticker_id=1,
+                        price=10.0008,
+                        timestamp=datetime.now() - timedelta(minutes=1),
+                    ),
+                ]
+            )
+            session.commit()
+
+        with self.client.websocket_connect("/v1/tickers/1/prices/ws") as websocket:
+            initial_prices = [websocket.receive_json() for _ in range(9)]
+
+            self.assertEqual(len(initial_prices), 9)
+            self.assertEqual(initial_prices[0]["price"], 10.001)
+            self.assertEqual(initial_prices[-1]["price"], 10.0008)
+
+            with self.TestingSessionLocal() as session:
+                session.add_all(
+                    [
+                        PriceTableModel(
+                            id=19, ticker_id=1, price=0.001, timestamp=datetime.now()
+                        ),
+                        PriceTableModel(
+                            id=20, ticker_id=1, price=100.002, timestamp=datetime.now()
+                        ),
+                    ]
+                )
+                session.commit()
+
+            more_prices = [websocket.receive_json() for _ in range(2)]
+            self.assertEqual(len(more_prices), 2)
+            self.assertEqual(more_prices[0]["price"], 0.001)
+            self.assertEqual(more_prices[1]["price"], 100.002)
+
+    def test_get_all_prices_by_ticker_id_ws_ticker_not_found(self):
+        with self.client.websocket_connect("/v1/tickers/15000/prices/ws") as websocket:
+            error_response = websocket.receive_json()
+
+            self.assertEqual({"error": "Ticker not found"}, error_response)

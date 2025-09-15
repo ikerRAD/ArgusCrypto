@@ -11,6 +11,11 @@ class PriceRepository(ABC):
 
     @abstractmethod
     def get_all_or_fail_by_ticker_id(
-        self, ticker_id: int, start_date: None | datetime, end_date: None | datetime
+        self,
+        ticker_id: int,
+        start_date: None | datetime,
+        end_date: None | datetime,
+        include_end=True,
+        check_ticker=True,
     ) -> list[Price]:
         pass

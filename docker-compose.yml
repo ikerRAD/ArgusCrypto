@@ -12,6 +12,7 @@ services:
     profiles:
       - database
       - backend
+      - app
       - mq
       - all
 
@@ -27,10 +28,23 @@ services:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-database}:${POSTGRES_PASSWORD:-database}@db:5432/${POSTGRES_DB:-database}"
     ports:
       - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
-    volumes:
-      - ./backend:/app
     profiles:
       - backend
+      - app
+      - all
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    ports:
+      - "${DASHBOARD_PORT:-8501}:${DASHBOARD_PORT:-8501}"
+    profiles:
+      - app
       - all
 
   rabbitmq:
@@ -57,7 +71,7 @@ services:
       - rabbitmq
     env_file:
       - .env
-    command: celery -A app.tasks beat --loglevel=info
+    command: celery -A app.tasks beat --loglevel=error
     entrypoint: []
     profiles:
       - mq
@@ -71,7 +85,7 @@ services:
       - rabbitmq
     env_file:
       - .env
-    command: celery -A app.tasks worker --loglevel=info
+    command: celery -A app.tasks worker --loglevel=error
     entrypoint: []
     profiles:
       - mq
