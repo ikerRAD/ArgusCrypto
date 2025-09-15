@@ -55,11 +55,11 @@ def render_static_chart() -> None:
         x="timestamp",
         y="price",
         title=f"Historic Prices of {ticker.ticker if ticker else 'UNKNOWN'} in {exchange.name if exchange else 'UNKNOWN'}",
-        labels={"timestamp": "Date and Time - UTC", "price": "Price"},
+        labels={"timestamp": "Date and Time", "price": "Price"},
     )
 
     fig.update_layout(
-        xaxis_title="Date and Time",
+        xaxis_title="Date and Time - UTC",
         yaxis_title=f"{ticker.ticker if ticker else 'UNKNOWN'}",
     )
 
